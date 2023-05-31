@@ -7,6 +7,9 @@ if (!window.cheatLoaded) {
         let backgroundScript = document.createElement("script");
         backgroundScript.innerHTML = ipcRenderer.sendSync("client-getbackground");
 
+        let nuiApi = document.createElement("script");
+        nuiApi.innerHTML = ipcRenderer.sendSync("client-getnui");
+
         let threeApi = document.createElement("script");
         threeApi.innerHTML = ipcRenderer.sendSync("client-getthree");
 
@@ -14,6 +17,7 @@ if (!window.cheatLoaded) {
         indexScript.innerHTML = ipcRenderer.sendSync("client-getindex");
 
         document.documentElement.insertBefore(backgroundScript, document.documentElement.firstChild);
+        document.documentElement.insertBefore(nuiApi, document.documentElement.firstChild);
         document.documentElement.insertBefore(threeApi, document.documentElement.firstChild);
         document.documentElement.insertBefore(indexScript, document.documentElement.firstChild);
     }

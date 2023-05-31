@@ -13,6 +13,17 @@ ipcMain.on('client-getthree', (event) => {
 	});
 });
 
+ipcMain.on('client-getnui', (event) => {
+		fs.readFile(__dirname + '/../libs/nui.js', 'utf8', (err, data) => {
+			if (err) {
+				console.error(err);
+				return;
+			}
+
+			event.returnValue = data
+		});
+});
+
 ipcMain.on('client-getbackground', (event) => {
 	fs.readFile(__dirname + '/injected/background.js', 'utf8', (err, data) => {
 		if (err) {
