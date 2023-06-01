@@ -5,12 +5,20 @@ let NarrowUI = {
 
     // intialize canvas shit
     init: function () {
-        this.canvas = document.createElement("canvas");
-        document.body.appendChild(this.canvas);
+        var element = document.getElementsByClassName("mainCanvas")[0];
 
-        this.resizeCanvas();
+        this.canvas = document.createElement("canvas");
+        this.canvas.style.display = "block";
+        this.canvas.style.position = "absolute";
+        this.canvas.style.top = "0";
+        this.canvas.style.left = "0";
+        this.canvas.style.zIndex = "1"; // google says this should work (worked)
+
+        document.body.insertBefore(this.canvas, element);
 
         this.context = this.canvas.getContext('2d');
+
+        this.resizeCanvas();
 
         window.addEventListener("resize", this.resizeCanvas.bind(this));
     },
@@ -23,12 +31,12 @@ let NarrowUI = {
         this.canvas.width = window.innerWidth;
         this.canvas.height = window.innerHeight;
 
-        clearCanvas();
+        this.clearCanvas();
     },
 
     // based off documentation idk if this actually works
     drawText: function (text, x, y, fontSize, color) {
-        this.context.fontSize = "${fontSize}px Arial"; // arial my love!
+        this.context.font = `${fontSize}px arial`; // arial my love!
         this.context.fillStyle = color;
         this.context.fillText(text, x, y);
     },
