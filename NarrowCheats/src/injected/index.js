@@ -4,6 +4,27 @@ window.CheatSDK.Settings = {
     Chams: {
         enabled: true,
         keybind: "z"
+    },
+    ArrayList: {
+        enabled: true,
+        keybind: undefined,
+
+        onFrame: function (width, height) {
+            let curY = 170;
+            for (var table in window.CheatSDK.Settings) {
+                if (window.CheatSDK.Settings.hasOwnProperty(table)) {
+                    var current = window.CheatSDK.Settings[table];
+
+                    if (current.keybind === undefined) {
+                        window.CheatSDK.GameRenderer.drawText(`${table}: ${current.enabled}`, width - 200, curY, 16, "blue");
+                    }
+                    else {
+                        window.CheatSDK.GameRenderer.drawText(`${table}[${current.keybind}]: ${current.enabled}`, width - 200, curY, 16, "blue");
+                    }
+                    curY += 24;
+                }
+            }
+        }
     }
 };
 
@@ -17,6 +38,14 @@ window.addEventListener("keydown", function (event) {
 
             if (event.key === current.keybind) {
                 current.enabled = !current.enabled;
+
+                if (current.enabled == true && current.onEnabled !== undefined) {
+                    current.onEnabled();
+                }
+
+                if (current.enabled == false && current.onDisabled !== undefined) {
+                    current.onDisabled();
+                }
             }
         }
     }
@@ -46,12 +75,21 @@ window.addEventListener("load", function () {
             });
         }
 
-        // draw here
+        // draw essentials here
         let width = window.CheatSDK.GameRenderer.canvas.width;
         let height = window.CheatSDK.GameRenderer.canvas.height;
 
-        window.CheatSDK.GameRenderer.clearCanvas();
-        window.CheatSDK.GameRenderer.drawText(`Chams[${window.CheatSDK.Settings.Chams.keybind}]: ${window.CheatSDK.Settings.Chams.enabled}`, width - 130, 30, 16, "blue");
+        window.CheatSDK.GameRenderer.clearCanvas(); // clear last frame drawings
+
+        for (var table in window.CheatSDK.Settings) {
+            if (window.CheatSDK.Settings.hasOwnProperty(table)) {
+                var current = window.CheatSDK.Settings[table];
+
+                if (current.enabled == true && current.onFrame !== undefined) {
+                    current.onFrame(width, height); // give canvas dims
+                }
+            }
+        }
 
         requestAnimationFrame(onFrame.bind(this));
     }
