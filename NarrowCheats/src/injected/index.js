@@ -26,7 +26,7 @@ window.addEventListener("load", function () {
     function onFrame() {
         if (window.CheatSDK.GameRenderer.context === null) {
             window.CheatSDK.GameRenderer.init();
-            console.log(window.CheatSDK.GameRenderer.context);
+            console.log(window.CheatSDK.GameRenderer.canvas);
         }
 
         if (window.CheatSDK.Scene !== undefined) {
@@ -46,8 +46,12 @@ window.addEventListener("load", function () {
             });
         }
 
+        // draw here
+        let width = window.CheatSDK.GameRenderer.canvas.width;
+        let height = window.CheatSDK.GameRenderer.canvas.height;
+
         window.CheatSDK.GameRenderer.clearCanvas();
-        window.CheatSDK.GameRenderer.drawText("Hello, world!", 50, 50, 24, "red");
+        window.CheatSDK.GameRenderer.drawText(`Chams[${window.CheatSDK.Settings.Chams.keybind}]: ${window.CheatSDK.Settings.Chams.enabled}`, width - 130, 30, 16, "blue");
 
         requestAnimationFrame(onFrame.bind(this));
     }

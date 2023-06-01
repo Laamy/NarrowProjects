@@ -18,6 +18,8 @@ let NarrowUI = {
 
         this.context = this.canvas.getContext('2d');
 
+        this.context.antialias = true;
+
         this.resizeCanvas();
 
         window.addEventListener("resize", this.resizeCanvas.bind(this));
