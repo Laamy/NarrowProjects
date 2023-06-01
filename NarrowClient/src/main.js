@@ -2,6 +2,28 @@ const { app, BrowserWindow, ipcMain, session } = require('electron');
 const fs = require('fs');
 const path = require('path');
 
+ipcMain.on('client-getbackground', (event) => {
+	fs.readFile(__dirname + '/injected/background.js', 'utf8', (err, data) => {
+		if (err) {
+			console.error(err);
+			return;
+		}
+
+		event.returnValue = data
+	});
+});
+
+ipcMain.on('client-getthree', (event) => {
+	fs.readFile(__dirname + '/../libs/three.js', 'utf8', (err, data) => {
+		if (err) {
+			console.error(err);
+			return;
+		}
+
+		event.returnValue = data
+	});
+});
+
 app.commandLine.appendSwitch('disable-frame-rate-limit');
 app.commandLine.appendSwitch('disable-gpu-vsync');
 
@@ -30,7 +52,7 @@ app.on('ready', () => {
 			webSecurity: false
 		},
 	});
-	mainWindow.removeMenu();
+	//mainWindow.removeMenu();
 
 	mainWindow.loadURL("https://narrow.one/");
 });
