@@ -42,6 +42,8 @@ window.CheatSDK.Settings = {
     }
 };
 
+console.log(window.CheatSDK);
+
 window.addEventListener("keydown", function (event) {
     Game.ForeachSetting(function (current) {
         if (event.key === current.keybind) {
