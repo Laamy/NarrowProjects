@@ -1,8 +1,40 @@
 window.selected = 0;
 window.renderDistance = 3; // default (900 far but i wont be using that)
 
+const SettingsGet = window.electronApi.SettingsGet;
+const SettingsSet = window.electronApi.SettingsSet;
+
+function SetUITheme(value) {
+	switch (value) {
+		case "0":
+			document.documentElement.classList = "theme-dark";
+			break;
+		case "1":
+			document.documentElement.classList = "theme-light"; // not needed
+			break;
+		case "2":
+			document.documentElement.classList = "theme-amoled";
+			break;
+		case "3":
+			document.documentElement.classList = "theme-purple";
+			break;
+	}
+}
+
 window.addEventListener("load", function () {
 	console.log(window.NarrowSDK);
+
+	if (SettingsGet('worldtime')) {
+		window.selected = SettingsGet('worldtime')
+	}
+
+	if (SettingsGet('renderdistance')) {
+		window.renderDistance = SettingsGet('renderdistance')
+	}
+
+	if (SettingsGet('theme')) {
+		SetUITheme(SettingsGet('theme'));
+	}
 
 	let settingsBtn = undefined;
 
@@ -113,6 +145,7 @@ window.addEventListener("load", function () {
 
 			selectElement.addEventListener("change", function (event) {
 				window.selected = event.target.value;
+				SettingsSet("worldtime", event.target.value);
 			});
 		}
 
@@ -152,6 +185,7 @@ window.addEventListener("load", function () {
 
 			selectElement.addEventListener("change", function (event) {
 				window.renderDistance = event.target.value;
+				SettingsSet("renderdistance", event.target.value);
 			});
 		}
 
@@ -199,20 +233,9 @@ window.addEventListener("load", function () {
 				selectElement.selectedIndex = 3;
 
 			selectElement.addEventListener("change", function (event) {
-				switch (event.target.value) {
-					case "0":
-						document.documentElement.classList = "theme-dark";
-						break;
-					case "1":
-						document.documentElement.classList = "theme-light"; // not needed
-						break;
-					case "2":
-						document.documentElement.classList = "theme-amoled";
-						break;
-					case "3":
-						document.documentElement.classList = "theme-purple";
-						break;
-				}
+				SettingsSet("theme", event.target.value);
+
+				SetUITheme(event.target.value);
 			});
 		}
 

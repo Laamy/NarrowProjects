@@ -4,8 +4,6 @@ const Store = require('electron-store');
 const fs = require('fs');
 const path = require('path');
 
-Store.initRenderer();
-
 const settings = new Store();
 
 ipcMain.on('client-getbackground', (event) => {

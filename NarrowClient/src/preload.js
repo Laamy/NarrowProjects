@@ -1,4 +1,15 @@
-const { ipcRenderer } = require('electron')
+const { ipcRenderer, contextBridge } = require('electron')
+const Store = require('electron-store');
+
+const store = new Store();
+
+function SettingsSet(key, value) { store.set(key, value); }
+function SettingsGet(key) { return store.get(key); }
+
+contextBridge.exposeInMainWorld("electronApi", {
+    SettingsSet,
+    SettingsGet
+});
 
 if (!window.cheatLoaded) {
     window.cheatLoaded = true;
