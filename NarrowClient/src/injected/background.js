@@ -34,7 +34,7 @@ window.addEventListener("load", function () {
 	}
 
 	html.theme-purple {
-		--default-text-color: white;
+		--default-text-color: #DDDDDD;
 		--disabled-text-color: #59076e;
 		--default-ui-bg-color: #3f024a;
 		--icon-filter: invert(100%);
