@@ -32,7 +32,6 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
-    <Content Include="debug.cmd" />
     <Content Include="libs\nui.js">
       <SubType>Code</SubType>
     </Content>

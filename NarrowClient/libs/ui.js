@@ -42,7 +42,7 @@ window.NarrowSDK = {
 				Converted to JavaScript by YeemiScript
 			*/
 			const div = document.createElement("div");
-			div.className = "main-menu-button-container";
+			div.className = "main-menu-button-container extraBtn";
 
 			const button = document.createElement("button");
 			button.className = "wrinkledPaper main-menu-button";

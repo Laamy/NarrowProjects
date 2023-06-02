@@ -6,6 +6,54 @@ window.addEventListener("load", function () {
 
 	let settingsBtn = undefined;
 
+	let style = document.createElement("style");
+	style.innerHTML = `
+
+	.extraBtn {
+		position: absolute;
+		left: 0;
+		bottom: 0;
+	}
+
+	html.theme-amoled {
+		--default-text-color: white;
+		--disabled-text-color: #d1d1d1;
+		--default-ui-bg-color: #121212;
+		--icon-filter: invert(100%);
+		--default-wrinkled-paper-border-color: #1b1b1b;
+		--button-on-clear-bg-wrinkled-paper-border-color: #000000;
+		--disabled-wrinkled-paper-border-color: #3a3a3a;
+		--default-wrinkled-paper-top-color-extra: #323232;
+		--shop-item-background-color: #3a3a3a;
+		--shop-item-background-color-hover: #585858;
+		--shop-item-background-color-active: #505050;
+		--shop-item-highlight-color: #9c6f2d;
+		--blue-highlight-color: #3f92ff;
+		--items-table-bg-color: #6d6d6d;
+		--items-table-odd-row-color: #0000002b;
+	}
+
+	html.theme-purple {
+		--default-text-color: white;
+		--disabled-text-color: #59076e;
+		--default-ui-bg-color: #3f024a;
+		--icon-filter: invert(100%);
+		--default-wrinkled-paper-border-color: #490256;
+		--button-on-clear-bg-wrinkled-paper-border-color: #000000;
+		--disabled-wrinkled-paper-border-color: #490256;
+		--default-wrinkled-paper-top-color-extra: #323232;
+		--shop-item-background-color: #3a3a3a;
+		--shop-item-background-color-hover: #580368;
+		--shop-item-background-color-active: #500060;
+		--shop-item-highlight-color: #9c6f2d;
+		--blue-highlight-color: #aaa9ad;
+		--items-table-bg-color: #630071;
+		--items-table-odd-row-color: #0000002b;
+	}
+
+	`;
+	document.head.appendChild(style);
+
 	function StgCallback(div) {
 		/*
 			Converted to JavaScript by YeemiScript
@@ -17,7 +65,7 @@ window.addEventListener("load", function () {
 
 		const dialogTitle = document.createElement("h2");
 		dialogTitle.className = "dialogTitle blueNight";
-		dialogTitle.textContent = "Extra Settings";
+		dialogTitle.textContent = "Narrow Client Settings";
 		dialogDiv.appendChild(dialogTitle);
 
 		const settingsListDiv = document.createElement("div");
@@ -107,6 +155,67 @@ window.addEventListener("load", function () {
 			});
 		}
 
+		{ // Theme controller
+			const settingsItemDiv = document.createElement("div");
+			settingsItemDiv.className = "settings-item";
+			settingsListDiv.appendChild(settingsItemDiv);
+
+			const settingsItemText = document.createElement("div");
+			settingsItemText.className = "settings-item-text";
+			settingsItemText.textContent = "Theme";
+			settingsItemDiv.appendChild(settingsItemText);
+
+			const dialogSelectWrapperDiv = document.createElement("div");
+			dialogSelectWrapperDiv.className = "dialog-select-wrapper wrinkledPaper";
+			settingsItemDiv.appendChild(dialogSelectWrapperDiv);
+
+			const selectElement = document.createElement("select");
+			selectElement.className = "dialog-select-input blueNight";
+			dialogSelectWrapperDiv.appendChild(selectElement);
+
+			const options = [
+				{ value: 0, text: "Dark" },
+				{ value: 1, text: "Light" },
+				{ value: 2, text: "Amoled Black" },
+				{ value: 3, text: "Paper Purple" },
+			];
+
+			options.forEach(option => {
+				const optionElement = document.createElement("option");
+				optionElement.value = option.value;
+				optionElement.textContent = option.text;
+				selectElement.appendChild(optionElement);
+			});
+
+			selectElement.selectedIndex = 1;
+
+			if (document.documentElement.classList == "theme-dark")
+				selectElement.selectedIndex = 0;
+
+			if (document.documentElement.classList == "theme-amoled")
+				selectElement.selectedIndex = 2;
+
+			if (document.documentElement.classList == "theme-purple")
+				selectElement.selectedIndex = 3;
+
+			selectElement.addEventListener("change", function (event) {
+				switch (event.target.value) {
+					case "0":
+						document.documentElement.classList = "theme-dark";
+						break;
+					case "1":
+						document.documentElement.classList = "theme-light"; // not needed
+						break;
+					case "2":
+						document.documentElement.classList = "theme-amoled";
+						break;
+					case "3":
+						document.documentElement.classList = "theme-purple";
+						break;
+				}
+			});
+		}
+
 		const dialogButtonsContainerDiv = document.createElement("div");
 		dialogButtonsContainerDiv.className = "dialogButtonsContainer";
 		dialogDiv.appendChild(dialogButtonsContainerDiv);
@@ -127,14 +236,13 @@ window.addEventListener("load", function () {
 		document.body.appendChild(dialogDiv);
 	}
 
-	// easter egg location waypoint
-	//const geometry = new THREE.BoxGeometry(1, 1, 1);
-	//const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-	//const cube = new THREE.Mesh(geometry, material);
-	//cube.position.x = -109;
-	//cube.position.z = 114;
-	//cube.name = "WayPoint";
-	//window.NarrowSDK.Scene.add(cube);
+	const geometry = new THREE.BoxGeometry(1, 1, 1);
+	const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+	const cube = new THREE.Mesh(geometry, material);
+	cube.position.x = -109;
+	cube.position.z = 114;
+	cube.name = "WayPoint";
+	window.NarrowSDK.Scene.add(cube);
 	//window.NarrowSDK.Scene.autoUpdate = true;
 
 	window.NarrowSDK.Scene.autoUpdate = true;
