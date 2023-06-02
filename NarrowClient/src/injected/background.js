@@ -1,4 +1,5 @@
 window.selected = 0;
+window.renderDistance = 3; // default (900 far but i wont be using that)
 
 window.addEventListener("load", function () {
 	console.log(window.NarrowSDK);
@@ -28,42 +29,83 @@ window.addEventListener("load", function () {
 		settingsGroupHeader.textContent = "World Visuals";
 		settingsListDiv.appendChild(settingsGroupHeader);
 
-		const settingsItemDiv = document.createElement("div");
-		settingsItemDiv.className = "settings-item";
-		settingsListDiv.appendChild(settingsItemDiv);
+		{ // time controller
+			const settingsItemDiv = document.createElement("div");
+			settingsItemDiv.className = "settings-item";
+			settingsListDiv.appendChild(settingsItemDiv);
 
-		const settingsItemText = document.createElement("div");
-		settingsItemText.className = "settings-item-text";
-		settingsItemText.textContent = "Skydome Theme";
-		settingsItemDiv.appendChild(settingsItemText);
+			const settingsItemText = document.createElement("div");
+			settingsItemText.className = "settings-item-text";
+			settingsItemText.textContent = "Skydome Theme";
+			settingsItemDiv.appendChild(settingsItemText);
 
-		const dialogSelectWrapperDiv = document.createElement("div");
-		dialogSelectWrapperDiv.className = "dialog-select-wrapper wrinkledPaper";
-		settingsItemDiv.appendChild(dialogSelectWrapperDiv);
+			const dialogSelectWrapperDiv = document.createElement("div");
+			dialogSelectWrapperDiv.className = "dialog-select-wrapper wrinkledPaper";
+			settingsItemDiv.appendChild(dialogSelectWrapperDiv);
 
-		const selectElement = document.createElement("select");
-		selectElement.className = "dialog-select-input blueNight";
-		dialogSelectWrapperDiv.appendChild(selectElement);
+			const selectElement = document.createElement("select");
+			selectElement.className = "dialog-select-input blueNight";
+			dialogSelectWrapperDiv.appendChild(selectElement);
 
-		const options = [
-			{ value: 0, text: "Sync with server" },
-			{ value: 1, text: "Day" },
-			{ value: 2, text: "Sunset" },
-			{ value: 3, text: "Night" }
-		];
+			const options = [
+				{ value: 0, text: "Sync with server" },
+				{ value: 1, text: "Day" },
+				{ value: 2, text: "Sunset" },
+				{ value: 3, text: "Night" }
+			];
 
-		options.forEach(option => {
-			const optionElement = document.createElement("option");
-			optionElement.value = option.value;
-			optionElement.textContent = option.text;
-			selectElement.appendChild(optionElement);
-		});
+			options.forEach(option => {
+				const optionElement = document.createElement("option");
+				optionElement.value = option.value;
+				optionElement.textContent = option.text;
+				selectElement.appendChild(optionElement);
+			});
 
-		selectElement.selectedIndex = window.selected;
+			selectElement.selectedIndex = window.selected;
 
-		selectElement.addEventListener("change", function (event) {
-			window.selected = event.target.value;
-		});
+			selectElement.addEventListener("change", function (event) {
+				window.selected = event.target.value;
+			});
+		}
+
+		{ // RenderDistance controller
+			const settingsItemDiv = document.createElement("div");
+			settingsItemDiv.className = "settings-item";
+			settingsListDiv.appendChild(settingsItemDiv);
+
+			const settingsItemText = document.createElement("div");
+			settingsItemText.className = "settings-item-text";
+			settingsItemText.textContent = "Render Distance";
+			settingsItemDiv.appendChild(settingsItemText);
+
+			const dialogSelectWrapperDiv = document.createElement("div");
+			dialogSelectWrapperDiv.className = "dialog-select-wrapper wrinkledPaper";
+			settingsItemDiv.appendChild(dialogSelectWrapperDiv);
+
+			const selectElement = document.createElement("select");
+			selectElement.className = "dialog-select-input blueNight";
+			dialogSelectWrapperDiv.appendChild(selectElement);
+
+			const options = [
+				{ value: 0, text: "Low" },
+				{ value: 1, text: "Medium" },
+				{ value: 2, text: "High" },
+				{ value: 3, text: "Extremely High" }
+			];
+
+			options.forEach(option => {
+				const optionElement = document.createElement("option");
+				optionElement.value = option.value;
+				optionElement.textContent = option.text;
+				selectElement.appendChild(optionElement);
+			});
+
+			selectElement.selectedIndex = window.renderDistance;
+
+			selectElement.addEventListener("change", function (event) {
+				window.renderDistance = event.target.value;
+			});
+		}
 
 		const dialogButtonsContainerDiv = document.createElement("div");
 		dialogButtonsContainerDiv.className = "dialogButtonsContainer";
@@ -85,6 +127,18 @@ window.addEventListener("load", function () {
 		document.body.appendChild(dialogDiv);
 	}
 
+	// easter egg location waypoint
+	//const geometry = new THREE.BoxGeometry(1, 1, 1);
+	//const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+	//const cube = new THREE.Mesh(geometry, material);
+	//cube.position.x = -109;
+	//cube.position.z = 114;
+	//cube.name = "WayPoint";
+	//window.NarrowSDK.Scene.add(cube);
+	//window.NarrowSDK.Scene.autoUpdate = true;
+
+	window.NarrowSDK.Scene.autoUpdate = true;
+
 	function onFrame() {
 		switch (window.selected) {
 			case "1":
@@ -97,6 +151,40 @@ window.addEventListener("load", function () {
 				window.NarrowSDK.SetSky(window.NarrowSDK.SkyDomes.Night);
 				break;
 		}
+		window.NarrowSDK.Scene.traverse(function (obj) {
+			if (obj.name === "skydome") {
+				window.NarrowSDK.Scene.traverse(function (obj2) {
+					if (obj2.name === "cam") {
+						obj.position = obj2.position;
+					}
+				});
+
+				obj.renderOrder = 0; // so it can draw over stuff
+
+				switch (window.renderDistance) {
+					case "0": // low
+						obj.scale.x = 0.1;
+						obj.scale.y = 0.1;
+						obj.scale.z = 0.1;
+						break;
+					case "1": // medium
+						obj.scale.x = 0.5;
+						obj.scale.y = 0.5;
+						obj.scale.z = 0.5;
+						break;
+					case "2": // high
+						obj.scale.x = 0.7;
+						obj.scale.y = 0.7;
+						obj.scale.z = 0.7;
+						break;
+					case "3": // extremely high
+						obj.scale.x = 1;
+						obj.scale.y = 1;
+						obj.scale.z = 1;
+						break;
+				}
+			}
+		});
 
 		if (settingsBtn === undefined) {
 			settingsBtn = window.NarrowSDK.NarrowUI.CreateMenu("static/img/menuUI/settings.svg", "Extra", StgCallback);
