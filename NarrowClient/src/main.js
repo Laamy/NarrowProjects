@@ -1,6 +1,12 @@
 const { app, BrowserWindow, ipcMain, session, globalShortcut, clipboard } = require('electron');
+const shortcuts = require('electron-localshortcut');
+const Store = require('electron-store');
 const fs = require('fs');
 const path = require('path');
+
+Store.initRenderer();
+
+const settings = new Store();
 
 ipcMain.on('client-getbackground', (event) => {
 	fs.readFile(__dirname + '/injected/background.js', 'utf8', (err, data) => {
@@ -67,11 +73,13 @@ app.on('ready', () => {
 
 	mainWindow.loadURL("https://narrow.one/");
 
-	globalShortcut.register('F6', () => {
-		const { clipboard } = require('electron');
-		const url = clipboard.readText();
-		mainWindow.loadURL(url);
+	//????
+	shortcuts.register(mainWindow, 'F11', () => {
+		mainWindow.setFullScreen(!mainWindow.isFullScreen());
 	});
+
+	shortcuts.register(mainWindow, 'F6', () => mainWindow.loadURL(clipboard.readText()));
+	shortcuts.register(mainWindow, 'F5', () => mainWindow.reload());
 });
 
 app.on('window-all-closed', () => app.quit());
