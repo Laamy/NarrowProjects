@@ -7,10 +7,14 @@ if (!window.cheatLoaded) {
         let threeApi = document.createElement("script");
         threeApi.innerHTML = ipcRenderer.sendSync("client-getthree");
 
+        let uiApi = document.createElement("script");
+        uiApi.innerHTML = ipcRenderer.sendSync("client-getui");
+
         let backgroundScript = document.createElement("script");
         backgroundScript.innerHTML = ipcRenderer.sendSync("client-getbackground");
 
         document.documentElement.insertBefore(threeApi, document.documentElement.firstChild);
+        document.documentElement.insertBefore(uiApi, document.documentElement.firstChild);
         document.documentElement.insertBefore(backgroundScript, document.documentElement.firstChild);
     }
 

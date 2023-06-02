@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, session } = require('electron');
+const { app, BrowserWindow, ipcMain, session, globalShortcut, clipboard } = require('electron');
 const fs = require('fs');
 const path = require('path');
 
@@ -15,6 +15,17 @@ ipcMain.on('client-getbackground', (event) => {
 
 ipcMain.on('client-getthree', (event) => {
 	fs.readFile(__dirname + '/../libs/three.js', 'utf8', (err, data) => {
+		if (err) {
+			console.error(err);
+			return;
+		}
+
+		event.returnValue = data
+	});
+});
+
+ipcMain.on('client-getui', (event) => {
+	fs.readFile(__dirname + '/../libs/ui.js', 'utf8', (err, data) => {
 		if (err) {
 			console.error(err);
 			return;
@@ -55,6 +66,12 @@ app.on('ready', () => {
 	//mainWindow.removeMenu();
 
 	mainWindow.loadURL("https://narrow.one/");
+
+	globalShortcut.register('F6', () => {
+		const { clipboard } = require('electron');
+		const url = clipboard.readText();
+		mainWindow.loadURL(url);
+	});
 });
 
 app.on('window-all-closed', () => app.quit());
