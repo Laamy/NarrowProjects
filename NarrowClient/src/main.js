@@ -39,8 +39,10 @@ ipcMain.on('client-getui', (event) => {
 	});
 });
 
-app.commandLine.appendSwitch('disable-frame-rate-limit');
-app.commandLine.appendSwitch('disable-gpu-vsync');
+if (settings.get("vsync") === false) {
+	app.commandLine.appendSwitch('disable-frame-rate-limit');
+	app.commandLine.appendSwitch('disable-gpu-vsync');
+}
 
 app.on('ready', () => {
 	const appSession = session.defaultSession;
@@ -50,7 +52,8 @@ app.on('ready', () => {
 
 		let cancelled = false;
 
-		if (url.includes("poki.com")) {
+		if (url.includes("poki.com") &&
+			(settings.get("adblock") === undefined || settings.get("adblock") === true)) {
 			cancelled = true;
 		}
 

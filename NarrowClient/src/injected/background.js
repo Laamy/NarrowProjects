@@ -115,10 +115,12 @@ window.addEventListener("load", function () {
 		settingsListDiv.className = "settings-list";
 		dialogDiv.appendChild(settingsListDiv);
 
-		const settingsGroupHeader = document.createElement("h3");
-		settingsGroupHeader.className = "settings-group-header";
-		settingsGroupHeader.textContent = "World Visuals";
-		settingsListDiv.appendChild(settingsGroupHeader);
+		{
+			const settingsGroupHeader = document.createElement("h3");
+			settingsGroupHeader.className = "settings-group-header";
+			settingsGroupHeader.textContent = "World Visuals";
+			settingsListDiv.appendChild(settingsGroupHeader);
+		}
 
 		{ // time controller
 			const settingsItemDiv = document.createElement("div");
@@ -200,6 +202,52 @@ window.addEventListener("load", function () {
 			});
 		}
 
+		{ // Game saturation controller
+			const settingsItemDiv = document.createElement("div");
+			settingsItemDiv.className = "settings-item";
+			settingsListDiv.appendChild(settingsItemDiv);
+
+			const settingsItemText = document.createElement("div");
+			settingsItemText.className = "settings-item-text";
+			settingsItemText.textContent = "Map Saturation";
+			settingsItemDiv.appendChild(settingsItemText);
+
+			const dialogSelectWrapperDiv = document.createElement("div");
+			dialogSelectWrapperDiv.className = "dialog-select-wrapper wrinkledPaper";
+			settingsItemDiv.appendChild(dialogSelectWrapperDiv);
+
+			const selectElement = document.createElement("select");
+			selectElement.className = "dialog-select-input blueNight";
+			dialogSelectWrapperDiv.appendChild(selectElement);
+
+			const options = [
+				{ value: 0, text: "Low" },
+				{ value: 1, text: "Default" },
+				{ value: 2, text: "High" }
+			];
+
+			options.forEach(option => {
+				const optionElement = document.createElement("option");
+				optionElement.value = option.value;
+				optionElement.textContent = option.text;
+				selectElement.appendChild(optionElement);
+			});
+
+			selectElement.selectedIndex = window.gameSaturation;
+
+			selectElement.addEventListener("change", function (event) {
+				window.gameSaturation = event.target.value;
+				SettingsSet("mapsaturation", event.target.value);
+			});
+		}
+
+		{
+			const settingsGroupHeader = document.createElement("h3");
+			settingsGroupHeader.className = "settings-group-header";
+			settingsGroupHeader.textContent = "UI Visuals";
+			settingsListDiv.appendChild(settingsGroupHeader);
+		}
+
 		{ // Theme controller
 			const settingsItemDiv = document.createElement("div");
 			settingsItemDiv.className = "settings-item";
@@ -250,43 +298,67 @@ window.addEventListener("load", function () {
 			});
 		}
 
-		{ // Game saturation controller
-			const settingsItemDiv = document.createElement("div");
-			settingsItemDiv.className = "settings-item";
+		{
+			const settingsGroupHeader = document.createElement("h3");
+			settingsGroupHeader.className = "settings-group-header";
+			settingsGroupHeader.textContent = "Client Settings (Restart Game)";
+			settingsListDiv.appendChild(settingsGroupHeader);
+		}
+
+		{
+			var settingsItemDiv = document.createElement("div");
+			settingsItemDiv.classList.add("settings-item");
+
+			var settingsItemTextDiv = document.createElement("div");
+			settingsItemTextDiv.classList.add("settings-item-text");
+			settingsItemTextDiv.textContent = "AdBlock";
+
+			var inputCheckbox = document.createElement("input");
+			inputCheckbox.setAttribute("type", "checkbox");
+			inputCheckbox.classList.add("dialog-checkbox-input", "wrinkledPaper");
+
+			if (SettingsGet("adblock") !== undefined) {
+				inputCheckbox.checked = SettingsGet("adblock");
+			}
+			else {
+				inputCheckbox.checked = true;
+			}
+
+			inputCheckbox.addEventListener("change", function (event) {
+				SettingsSet("adblock", event.target.checked);
+			});
+
+			settingsItemDiv.appendChild(settingsItemTextDiv);
+			settingsItemDiv.appendChild(inputCheckbox);
 			settingsListDiv.appendChild(settingsItemDiv);
+		}
 
-			const settingsItemText = document.createElement("div");
-			settingsItemText.className = "settings-item-text";
-			settingsItemText.textContent = "Map Saturation";
-			settingsItemDiv.appendChild(settingsItemText);
+		{
+			var settingsItemDiv = document.createElement("div");
+			settingsItemDiv.classList.add("settings-item");
 
-			const dialogSelectWrapperDiv = document.createElement("div");
-			dialogSelectWrapperDiv.className = "dialog-select-wrapper wrinkledPaper";
-			settingsItemDiv.appendChild(dialogSelectWrapperDiv);
+			var settingsItemTextDiv = document.createElement("div");
+			settingsItemTextDiv.classList.add("settings-item-text");
+			settingsItemTextDiv.textContent = "V-Sync";
 
-			const selectElement = document.createElement("select");
-			selectElement.className = "dialog-select-input blueNight";
-			dialogSelectWrapperDiv.appendChild(selectElement);
+			var inputCheckbox = document.createElement("input");
+			inputCheckbox.setAttribute("type", "checkbox");
+			inputCheckbox.classList.add("dialog-checkbox-input", "wrinkledPaper");
 
-			const options = [
-				{ value: 0, text: "Low" },
-				{ value: 1, text: "Default" },
-				{ value: 2, text: "High" }
-			];
+			if (SettingsGet("vsync") !== undefined) {
+				inputCheckbox.checked = SettingsGet("vsync");
+			}
+			else {
+				inputCheckbox.checked = true;
+			}
 
-			options.forEach(option => {
-				const optionElement = document.createElement("option");
-				optionElement.value = option.value;
-				optionElement.textContent = option.text;
-				selectElement.appendChild(optionElement);
+			inputCheckbox.addEventListener("change", function (event) {
+				SettingsSet("vsync", event.target.checked);
 			});
 
-			selectElement.selectedIndex = window.gameSaturation;
-
-			selectElement.addEventListener("change", function (event) {
-				window.gameSaturation = event.target.value;
-				SettingsSet("mapsaturation", event.target.value);
-			});
+			settingsItemDiv.appendChild(settingsItemTextDiv);
+			settingsItemDiv.appendChild(inputCheckbox);
+			settingsListDiv.appendChild(settingsItemDiv);
 		}
 
 		const dialogButtonsContainerDiv = document.createElement("div");
