@@ -1,5 +1,6 @@
 window.selected = 0;
 window.renderDistance = 3; // default (900 far but i wont be using that)
+window.gameSaturation = "1";
 
 const SettingsGet = window.electronApi.SettingsGet;
 const SettingsSet = window.electronApi.SettingsSet;
@@ -21,24 +22,37 @@ function SetUITheme(value) {
 	}
 }
 
+function SetGameSaturation(amount) {
+	window.NarrowSDK.Scene.traverse(function (obj) {
+		if (obj.name === "map_merged") { // merged models tend to be the map
+			obj.material[0].uniforms.saturation = { value: amount }; // map
+			obj.material[1].uniforms.saturation = { value: amount }; // extra map details like plants
+		}
+	});
+}
+
 window.addEventListener("load", function () {
 	console.log(window.NarrowSDK);
 
 	if (SettingsGet('worldtime')) {
-		window.selected = SettingsGet('worldtime')
+		window.selected = SettingsGet('worldtime');
 	}
 
 	if (SettingsGet('renderdistance')) {
-		window.renderDistance = SettingsGet('renderdistance')
+		window.renderDistance = SettingsGet('renderdistance');
 	}
 
 	if (SettingsGet('theme')) {
 		SetUITheme(SettingsGet('theme'));
 	}
 
+	if (SettingsGet('mapsaturation')) {
+		window.gameSaturation = SettingsGet('mapsaturation');
+	}
+
 	let settingsBtn = undefined;
 
-	let style = document.createElement("style");
+	let style = document.createElement("style"); // forgot to do the other two elements, my bad !
 	style.innerHTML = `
 
 	.extraBtn {
@@ -239,6 +253,45 @@ window.addEventListener("load", function () {
 			});
 		}
 
+		{ // Game saturation controller
+			const settingsItemDiv = document.createElement("div");
+			settingsItemDiv.className = "settings-item";
+			settingsListDiv.appendChild(settingsItemDiv);
+
+			const settingsItemText = document.createElement("div");
+			settingsItemText.className = "settings-item-text";
+			settingsItemText.textContent = "Map Saturation";
+			settingsItemDiv.appendChild(settingsItemText);
+
+			const dialogSelectWrapperDiv = document.createElement("div");
+			dialogSelectWrapperDiv.className = "dialog-select-wrapper wrinkledPaper";
+			settingsItemDiv.appendChild(dialogSelectWrapperDiv);
+
+			const selectElement = document.createElement("select");
+			selectElement.className = "dialog-select-input blueNight";
+			dialogSelectWrapperDiv.appendChild(selectElement);
+
+			const options = [
+				{ value: 0, text: "Low" },
+				{ value: 1, text: "Default" },
+				{ value: 2, text: "High" }
+			];
+
+			options.forEach(option => {
+				const optionElement = document.createElement("option");
+				optionElement.value = option.value;
+				optionElement.textContent = option.text;
+				selectElement.appendChild(optionElement);
+			});
+
+			selectElement.selectedIndex = window.gameSaturation;
+
+			selectElement.addEventListener("change", function (event) {
+				window.gameSaturation = event.target.value;
+				SettingsSet("mapsaturation", event.target.value);
+			});
+		}
+
 		const dialogButtonsContainerDiv = document.createElement("div");
 		dialogButtonsContainerDiv.className = "dialogButtonsContainer";
 		dialogDiv.appendChild(dialogButtonsContainerDiv);
@@ -316,6 +369,18 @@ window.addEventListener("load", function () {
 				}
 			}
 		});
+
+		switch (window.gameSaturation) {
+			case "0":
+				SetGameSaturation(1)
+				break;
+			case "1":
+				SetGameSaturation(1.2)
+				break;
+			case "2":
+				SetGameSaturation(1.5)
+				break;
+		}
 
 		if (settingsBtn === undefined) {
 			settingsBtn = window.NarrowSDK.NarrowUI.CreateMenu("static/img/menuUI/settings.svg", "Extra", StgCallback);

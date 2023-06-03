@@ -33,15 +33,11 @@
   </PropertyGroup>
   <ItemGroup>
     <Content Include="debug.cmd" />
-    <Content Include="libs\nui.js">
-      <SubType>Code</SubType>
-    </Content>
     <Content Include="libs\three.js" />
     <Content Include="package.json" />
     <Content Include="README.md" />
     <Content Include="src\injected\background.js" />
     <Content Include="src\main.js" />
-    <Content Include="src\injected\index.js" />
     <Content Include="src\preload.js" />
   </ItemGroup>
   <ItemGroup>
