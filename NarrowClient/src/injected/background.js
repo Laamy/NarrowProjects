@@ -37,15 +37,12 @@ window.addEventListener("load", function () {
 	if (SettingsGet('worldtime')) {
 		window.selected = SettingsGet('worldtime');
 	}
-
 	if (SettingsGet('renderdistance')) {
 		window.renderDistance = SettingsGet('renderdistance');
 	}
-
 	if (SettingsGet('theme')) {
 		SetUITheme(SettingsGet('theme'));
 	}
-
 	if (SettingsGet('mapsaturation')) {
 		window.gameSaturation = SettingsGet('mapsaturation');
 	}
