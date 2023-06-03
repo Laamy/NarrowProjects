@@ -32,8 +32,8 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
-    <Content Include="debug.cmd" />
     <Content Include="libs\three.js" />
+    <Content Include="libs\ui.js" />
     <Content Include="package.json" />
     <Content Include="README.md" />
     <Content Include="src\injected\background.js" />
