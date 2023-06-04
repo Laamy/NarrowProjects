@@ -23,12 +23,28 @@ function SetUITheme(value) {
 }
 
 function SetGameSaturation(amount) {
-	window.NarrowSDK.Scene.traverse(function (obj) {
-		if (obj.name === "map_merged") { // merged models tend to be the map
+	window.NarrowSDK.Scene.traverse(function (obj) { // can sokmetimes be undefined for some reason
+		if ((obj.name === "map_merged" || obj.name === " merged") && obj.material !== undefined) { // merged models tend to be the map
 			obj.material[0].uniforms.saturation = { value: amount }; // map
-			obj.material[1].uniforms.saturation = { value: amount }; // extra map details like plants
+
+			if (obj.material[1] !== undefined) {
+				obj.material[1].uniforms.saturation = { value: amount }; // extra map details like plants
+			}
 		}
 	});
+}
+
+function GetLocalPlayerModel() {
+	let playerModel = undefined;
+
+	window.NarrowSDK.Scene.traverse(function (obj2) {
+		if (playerModel === undefined && obj2.name === "player") {
+			playerModel = obj2;
+			return;
+		}
+	});
+
+	return playerModel;
 }
 
 window.addEventListener("load", function () {
@@ -392,7 +408,49 @@ window.addEventListener("load", function () {
 
 	window.NarrowSDK.Scene.autoUpdate = true;
 
+	const wingGeometry = new THREE.BoxGeometry(0.05, 0.5, 0.3);
+	const wingMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+
+	const leftWing = new THREE.Mesh(wingGeometry, wingMaterial);
+	leftWing.position.x = 0.2;
+	leftWing.rotation.y = -10;
+
+	const rightWing = new THREE.Mesh(wingGeometry, wingMaterial);
+	rightWing.position.x = -0.2;
+	rightWing.rotation.y = 10;
+
+	const wingsGroup = new THREE.Group();
+	wingsGroup.add(leftWing, rightWing);
+
+	function calculatePointBehind(pos, rots) {
+		//let scalar = 0.0349;
+		let rotsRad = new THREE.Vector3(0, (rots.y), 0);
+
+		let direction = new THREE.Vector3(Math.cos(rotsRad.y), Math.sin(rotsRad.y), 0);
+
+		let pointBehind = new THREE.Vector3().copy(pos).sub(direction);
+
+		return pointBehind;
+	}
+
+	window.NarrowSDK.Scene.add(wingsGroup);
+
+	const offset = new THREE.Vector3(0, 1.3, -0.2);
+
 	function onFrame() {
+		requestAnimationFrame(onFrame.bind(this));
+
+		let player = GetLocalPlayerModel();
+		if (player !== undefined) {
+			const meshWorldPosition = player.position;
+
+			const offsetPosition = offset.clone().applyQuaternion(player.quaternion);
+			const groupPosition = meshWorldPosition.add(offsetPosition);
+
+			wingsGroup.position.copy(groupPosition);
+			wingsGroup.rotation.copy(player.rotation);
+		}
+
 		switch (window.selected) {
 			case "1":
 				window.NarrowSDK.SetSky(window.NarrowSDK.SkyDomes.Day);
@@ -454,8 +512,6 @@ window.addEventListener("load", function () {
 		if (settingsBtn === undefined) {
 			settingsBtn = window.NarrowSDK.NarrowUI.CreateMenu("static/img/menuUI/settings.svg", "Extra", StgCallback);
 		}
-
-		requestAnimationFrame(onFrame.bind(this));
 	}
 
 	onFrame();
