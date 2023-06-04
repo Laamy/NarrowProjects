@@ -5,6 +5,95 @@ window.gameSaturation = "1";
 const SettingsGet = window.electronApi.SettingsGet;
 const SettingsSet = window.electronApi.SettingsSet;
 
+// ported from my old cheat
+NarrowUI = {
+	canvas: null,
+	context: null,
+
+	init: function () {
+		var element = document.getElementsByClassName("mainCanvas")[0];
+
+		this.canvas = document.createElement("canvas");
+		this.canvas.style.display = "block";
+		this.canvas.style.position = "absolute";
+		this.canvas.style.top = "0";
+		this.canvas.style.left = "0";
+		this.canvas.style.zIndex = "1"; // google says this should work (worked)
+
+		document.body.insertBefore(this.canvas, element);
+
+		this.context = this.canvas.getContext('2d');
+
+		this.context.antialias = true;
+
+		this.resizeCanvas();
+
+		window.addEventListener("resize", this.resizeCanvas.bind(this));
+	},
+
+	clearCanvas: function () {
+		this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+	},
+
+	resizeCanvas: function () {
+		this.canvas.width = window.innerWidth;
+		this.canvas.height = window.innerHeight;
+
+		this.clearCanvas();
+	},
+
+	drawText: function (text, x, y, fontSize, color) {
+		this.context.font = `${fontSize}px arial`; // arial my love!
+		this.context.fillStyle = color;
+		this.context.fillText(text, x, y);
+	},
+
+	fillRect: function (x, y, width, height, color) {
+		this.context.fillStyle = color;
+		this.context.fillRect(x, y, width, height);
+	},
+
+	pushNotification: function (title, reason) {
+		const dialogContainer = document.createElement('div');
+		dialogContainer.classList.add('dialog', 'wrinkledPaper');
+		dialogContainer.style.setProperty('--wrinkled-paper-seed', '63563');
+		dialogContainer.style.setProperty('z-index', '100');
+
+		const dialogTitle = document.createElement('h2');
+		dialogTitle.classList.add('dialogTitle', 'blueNight');
+		dialogTitle.textContent = 'Connection closed';
+		dialogContainer.appendChild(dialogTitle);
+
+		const dialogText = document.createElement('div');
+		dialogText.classList.add('dialogText');
+		dialogText.textContent = 'You have been kicked for being afk for too long';
+		dialogContainer.appendChild(dialogText);
+
+		const dialogButtonsContainer = document.createElement('div');
+		dialogButtonsContainer.classList.add('dialogButtonsContainer');
+
+		const dialogButton = document.createElement('button');
+		dialogButton.classList.add('dialog-button', 'blueNight', 'wrinkledPaper');
+		dialogButton.style.setProperty('--wrinkled-paper-seed', '21569');
+		dialogButton.innerHTML = '<span>ok</span>';
+		dialogButtonsContainer.appendChild(dialogButton);
+
+		dialogContainer.appendChild(dialogButtonsContainer);
+
+		document.body.append(dialogContainer);
+
+		this.drawShadow();
+	},
+
+	drawShadow: function () {
+		const dialogCurtain = document.createElement('div');
+		dialogCurtain.classList.add('dialogCurtain', 'fullScreen');
+		dialogCurtain.style.setProperty('z-index', '99');
+
+		document.body.append(dialogCurtain);
+	}
+}
+
 function SetUITheme(value) {
 	switch (value) {
 		case "0":
@@ -411,45 +500,63 @@ window.addEventListener("load", function () {
 	const wingGeometry = new THREE.BoxGeometry(0.05, 0.5, 0.3);
 	const wingMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
 
-	const leftWing = new THREE.Mesh(wingGeometry, wingMaterial);
-	leftWing.position.x = 0.2;
-	leftWing.rotation.y = -10;
+	//const leftWing = new THREE.Mesh(wingGeometry, wingMaterial);
+	//leftWing.position.x = 0.2;
+	//leftWing.rotation.y = -10;
 
-	const rightWing = new THREE.Mesh(wingGeometry, wingMaterial);
-	rightWing.position.x = -0.2;
-	rightWing.rotation.y = 10;
+	//const rightWing = new THREE.Mesh(wingGeometry, wingMaterial);
+	//rightWing.position.x = -0.2;
+	//rightWing.rotation.y = 10;
 
-	const wingsGroup = new THREE.Group();
-	wingsGroup.add(leftWing, rightWing);
+	//const wingsGroup = new THREE.Group();
+	//wingsGroup.add(leftWing, rightWing);
 
-	function calculatePointBehind(pos, rots) {
-		//let scalar = 0.0349;
-		let rotsRad = new THREE.Vector3(0, (rots.y), 0);
+	//function calculatePointBehind(pos, rots) {
+	//	//let scalar = 0.0349;
+	//	let rotsRad = new THREE.Vector3(0, (rots.y), 0);
 
-		let direction = new THREE.Vector3(Math.cos(rotsRad.y), Math.sin(rotsRad.y), 0);
+	//	let direction = new THREE.Vector3(Math.cos(rotsRad.y), Math.sin(rotsRad.y), 0);
 
-		let pointBehind = new THREE.Vector3().copy(pos).sub(direction);
+	//	let pointBehind = new THREE.Vector3().copy(pos).sub(direction);
 
-		return pointBehind;
-	}
+	//	return pointBehind;
+	//}
 
-	window.NarrowSDK.Scene.add(wingsGroup);
+	//window.NarrowSDK.Scene.add(wingsGroup);
 
-	const offset = new THREE.Vector3(0, 1.3, -0.2);
+	//const offset = new THREE.Vector3(0, 1.3, -0.2);
 
 	function onFrame() {
+		if (NarrowUI.context === null) {
+			NarrowUI.init();
+			console.log(NarrowUI.canvas);
+		}
+
+		if (window.NarrowSDK.Scene !== undefined) {
+			// draw essentials here
+			let width = NarrowUI.canvas.width;
+			let height = NarrowUI.canvas.height;
+
+			NarrowUI.clearCanvas(); // clear last frame drawings
+			NarrowUI.drawText(`Hello, world!`, width - 200, 160, 16, "blue");
+		}
+
 		requestAnimationFrame(onFrame.bind(this));
 
-		let player = GetLocalPlayerModel();
-		if (player !== undefined) {
-			const meshWorldPosition = player.position;
+		//let player = GetLocalPlayerModel();
+		//if (player !== undefined) {
+		//	const meshWorldPosition = player.position;
+		//	const offsetPosition = offset.clone().applyQuaternion(player.quaternion);
+		//	const groupPosition = meshWorldPosition.add(offsetPosition);
+		//	wingsGroup.position.copy(groupPosition);
+		//	wingsGroup.rotation.copy(player.rotation);
+		//}
 
-			const offsetPosition = offset.clone().applyQuaternion(player.quaternion);
-			const groupPosition = meshWorldPosition.add(offsetPosition);
-
-			wingsGroup.position.copy(groupPosition);
-			wingsGroup.rotation.copy(player.rotation);
-		}
+		window.NarrowSDK.Scene.traverse(function (obj) {
+			if (obj.name.includes("Arrow trail")) {
+				// gotta compile my own shader bruh
+			}
+		});
 
 		switch (window.selected) {
 			case "1":
@@ -515,4 +622,58 @@ window.addEventListener("load", function () {
 	}
 
 	onFrame();
-});
+}); 
+
+//function CreateArrowTrailShader() {
+//	new ShaderMaterial({
+//		name: "narrowClientSkinned",
+//		vertexShader: "",
+//		fragmentShader: "",
+//		uniforms: {
+//			saturation: {
+//				value: 1
+//			},
+//			colorMultiplier: {
+//				value: new Color(1, 1, 1)
+//			},
+//			colorAdder: {
+//				value: new Color(0, 0, 0)
+//			},
+//			skyHighCol: {
+//				value: new Color
+//			},
+//			skyMidCol: {
+//				value: new Color
+//			},
+//			skyLowCol: {
+//				value: new Color
+//			},
+//			skyPower: {
+//				value: 1
+//			},
+//			fogAmount: {
+//				value: .002
+//			},
+//			fogHeightAmount: {
+//				value: 0
+//			},
+//			fogHeightOffset: {
+//				value: 0
+//			},
+//			fogHeightDistFalloff: {
+//				value: 0
+//			},
+//			fogHeightAmountMin: {
+//				value: 0
+//			},
+//			fogHeightAmountMax: {
+//				value: 0
+//			},
+//			...a
+//		},
+//		side: THREE.FrontSide,
+//		vertexColors: true,
+//		depthWrite: true,
+//		depthTest: true
+//	});
+//}
