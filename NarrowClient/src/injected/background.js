@@ -677,8 +677,7 @@ window.addEventListener("load", function () {
 			let height = NarrowUI.canvas.height;
 
 			NarrowUI.clearCanvas(); // clear last frame drawings
-			NarrowUI.drawText(`NarrowClient & Iris Developer`, width - 250, 160, 16, "blue");
-			NarrowUI.drawText(`https://discord.gg/3Da9HakJam`, width - 250, 180, 16, "blue");
+			//NarrowUI.drawText(`NarrowClient`, width - 250, 160, 16, "blue");
 		}
 
 		requestAnimationFrame(onFrame.bind(this));
