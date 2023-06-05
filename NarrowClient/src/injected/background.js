@@ -693,11 +693,11 @@ window.addEventListener("load", function () {
 			wingsGroup.visible = player.visible; // third person only
 		}
 
-		window.NarrowSDK.Scene.traverse(function (obj) {
-			if (obj.name.includes("Arrow trail")) {
-				// gotta compile my own shader bruh
-			}
-		});
+		//window.NarrowSDK.Scene.traverse(function (obj) {
+		//	if (obj.name.includes("Arrow trail")) {
+		//		// gotta compile my own shader bruh
+		//	}
+		//});
 
 		switch (window.selected) {
 			case "1":
