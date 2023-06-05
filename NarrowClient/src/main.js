@@ -17,6 +17,8 @@ ipcMain.on('client-getbackground', (event) => {
 	});
 });
 
+ipcMain.on('client-dirname', (event) => event.returnValue = __dirname);
+
 ipcMain.on('client-getthree', (event) => {
 	fs.readFile(__dirname + '/../libs/three.js', 'utf8', (err, data) => {
 		if (err) {

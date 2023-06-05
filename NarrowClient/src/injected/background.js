@@ -18,7 +18,7 @@ NarrowUI = {
 		this.canvas.style.position = "absolute";
 		this.canvas.style.top = "0";
 		this.canvas.style.left = "0";
-		this.canvas.style.zIndex = "1"; // google says this should work (worked)
+		this.canvas.style.zIndex = "1";
 
 		document.body.insertBefore(this.canvas, element);
 
@@ -94,6 +94,23 @@ NarrowUI = {
 	}
 }
 
+let defaultKeyBindings = { // dont modify this one
+	switchWeapon: "KeyQ", // toggleWeapon
+	playerList: "Tab",
+	toggleThirdPerson: "KeyY",
+	openChat: "KeyT"
+};
+
+// default keybinds
+let keyBindings = {
+	switchWeapon: "KeyQ",
+	playerList: "Tab",
+	toggleThirdPerson: "KeyY",
+	openChat: "KeyT"
+};
+
+NarrowSDK.NarrowUI2D = NarrowUI; // debugging reasons but dont use this reference
+
 function SetUITheme(value) {
 	switch (value) {
 		case "0":
@@ -135,6 +152,33 @@ function GetLocalPlayerModel() {
 
 	return playerModel;
 }
+
+const originalAddEventListener = EventTarget.prototype.addEventListener;
+//EventTarget.prototype.addEventListener = function (type, listener, options) {
+//	const modifiedListener = function (event) {
+//		if (type === 'keyup' || type === 'keydown') {
+//			if (event.code === 'Enter') {
+//				listener.call(this, {
+//					code: defaultKeyBindings.openChat[0],
+//					preventDefault: function () {
+//						event.preventDefault();
+//					}
+//				});
+//			}
+
+//			if (event.code === 'KeyT') { // cancel T events
+//				//if (!event.fromCustomCode) {
+//				//	event.preventDefault();
+//				//	return;
+//				//}
+//			}
+//		}
+
+//		listener.call(this, event);
+//	};
+
+//	originalAddEventListener.call(this, type, modifiedListener, options);
+//};
 
 window.addEventListener("load", function () {
 	console.log(window.NarrowSDK);
@@ -486,6 +530,79 @@ window.addEventListener("load", function () {
 		document.body.appendChild(dialogDiv);
 	}
 
+	function KbsCallback(div) {
+		const dialogDiv = document.createElement("div");
+		dialogDiv.className = "dialog wrinkledPaper";
+		dialogDiv.style.setProperty("--wrinkled-paper-seed", "42489");
+		dialogDiv.style.setProperty("z-index", "100");
+
+		const dialogTitle = document.createElement("h2");
+		dialogTitle.className = "dialogTitle blueNight";
+		dialogTitle.textContent = "Narrow Keybinds";
+		dialogDiv.appendChild(dialogTitle);
+
+		const keybindsListDiv = document.createElement("div");
+		keybindsListDiv.className = "keybinds-list";
+		dialogDiv.appendChild(keybindsListDiv);
+
+		function changeKeybind(actionName, key) {
+			console.log(`Keybind for ${actionName} changed to ${key}`);
+		}
+
+		const chatItem = createKeybindItem("Open Chat", defaultKeyBindings.openChat, changeKeybind);
+		keybindsListDiv.appendChild(chatItem);
+
+		const switchWeaponItem = createKeybindItem("Switch Weapon", defaultKeyBindings.switchWeapon, changeKeybind);
+		keybindsListDiv.appendChild(switchWeaponItem);
+
+		function createKeybindItem(label, defaultKey, onClick) {
+			const itemDiv = document.createElement("div");
+			itemDiv.className = "keybind-item";
+
+			const labelSpan = document.createElement("span");
+			labelSpan.textContent = label;
+			itemDiv.appendChild(labelSpan);
+
+			const keyInput = document.createElement("input");
+			keyInput.type = "text";
+			keyInput.value = defaultKey;
+			keyInput.addEventListener("keydown", function (event) {
+				event.preventDefault();
+				keyInput.value = event.key;
+			});
+
+			const saveButton = document.createElement("button");
+			saveButton.textContent = "Save";
+			saveButton.addEventListener("click", function () {
+				onClick(label, keyInput.value);
+			});
+
+			itemDiv.appendChild(keyInput);
+			itemDiv.appendChild(saveButton);
+
+			return itemDiv;
+		}
+
+		const dialogButtonsContainerDiv = document.createElement("div");
+		dialogButtonsContainerDiv.className = "dialogButtonsContainer";
+		dialogDiv.appendChild(dialogButtonsContainerDiv);
+
+		const saveButton = document.createElement("button");
+		saveButton.className = "dialog-button blueNight wrinkledPaper";
+		saveButton.style.setProperty("--wrinkled-paper-seed", "25637");
+		dialogButtonsContainerDiv.appendChild(saveButton);
+
+		const saveButtonSpan = document.createElement("span");
+		saveButtonSpan.textContent = "Save";
+		saveButton.appendChild(saveButtonSpan);
+
+		saveButton.addEventListener("click", function () {
+			dialogDiv.remove(); // idk tbh
+		});
+
+		document.body.appendChild(dialogDiv);
+	}
+
 	const geometry = new THREE.BoxGeometry(1, 1, 1);
 	const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
 	const cube = new THREE.Mesh(geometry, material);
@@ -497,39 +614,45 @@ window.addEventListener("load", function () {
 
 	window.NarrowSDK.Scene.autoUpdate = true;
 
-	const wingGeometry = new THREE.BoxGeometry(0.05, 0.5, 0.3);
-	const wingMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+	const texture = new THREE.TextureLoader().load(window.electronApi.dirname + '/assets/default_wing.png'); 
+	texture.transparent = true;
+	texture.alphaTest = 0.5;
 
-	//const leftWing = new THREE.Mesh(wingGeometry, wingMaterial);
-	//leftWing.position.x = 0.2;
-	//leftWing.rotation.y = -10;
+	const wingGeometry = new THREE.BoxGeometry(0, 0.3, 0.4);
+	const wingMaterial = new THREE.MeshBasicMaterial({
+		map: texture,
+		transparent: true
+	});
 
-	//const rightWing = new THREE.Mesh(wingGeometry, wingMaterial);
-	//rightWing.position.x = -0.2;
-	//rightWing.rotation.y = 10;
+	const leftWing = new THREE.Mesh(wingGeometry, wingMaterial);
+	leftWing.position.x = 0.2;
+	leftWing.rotation.y = -10;
 
-	//const wingsGroup = new THREE.Group();
-	//wingsGroup.add(leftWing, rightWing);
+	const rightWing = new THREE.Mesh(wingGeometry, wingMaterial);
+	rightWing.position.x = -0.2;
+	rightWing.rotation.y = 10;
 
-	//function calculatePointBehind(pos, rots) {
-	//	//let scalar = 0.0349;
-	//	let rotsRad = new THREE.Vector3(0, (rots.y), 0);
+	const wingsGroup = new THREE.Group();
+	wingsGroup.add(leftWing, rightWing);
 
-	//	let direction = new THREE.Vector3(Math.cos(rotsRad.y), Math.sin(rotsRad.y), 0);
+	function calculatePointBehind(pos, rots) {
+		//let scalar = 0.0349;
+		let rotsRad = new THREE.Vector3(0, (rots.y), 0);
 
-	//	let pointBehind = new THREE.Vector3().copy(pos).sub(direction);
+		let direction = new THREE.Vector3(Math.cos(rotsRad.y), Math.sin(rotsRad.y), 0);
 
-	//	return pointBehind;
-	//}
+		let pointBehind = new THREE.Vector3().copy(pos).sub(direction);
 
-	//window.NarrowSDK.Scene.add(wingsGroup);
+		return pointBehind;
+	}
 
-	//const offset = new THREE.Vector3(0, 1.3, -0.2);
+	window.NarrowSDK.Scene.add(wingsGroup);
+
+	const offset = new THREE.Vector3(0, 1.3, -0.2);
 
 	function onFrame() {
 		if (NarrowUI.context === null) {
 			NarrowUI.init();
-			console.log(NarrowUI.canvas);
 		}
 
 		if (window.NarrowSDK.Scene !== undefined) {
@@ -538,19 +661,20 @@ window.addEventListener("load", function () {
 			let height = NarrowUI.canvas.height;
 
 			NarrowUI.clearCanvas(); // clear last frame drawings
-			NarrowUI.drawText(`Hello, world!`, width - 200, 160, 16, "blue");
+			NarrowUI.drawText(`NarrowClient & Iris Developer`, width - 250, 160, 16, "blue");
+			NarrowUI.drawText(`https://discord.gg/3Da9HakJam`, width - 250, 180, 16, "blue");
 		}
 
 		requestAnimationFrame(onFrame.bind(this));
 
-		//let player = GetLocalPlayerModel();
-		//if (player !== undefined) {
-		//	const meshWorldPosition = player.position;
-		//	const offsetPosition = offset.clone().applyQuaternion(player.quaternion);
-		//	const groupPosition = meshWorldPosition.add(offsetPosition);
-		//	wingsGroup.position.copy(groupPosition);
-		//	wingsGroup.rotation.copy(player.rotation);
-		//}
+		let player = GetLocalPlayerModel();
+		if (player !== undefined) {
+			const meshWorldPosition = player.position;
+			const offsetPosition = offset.clone().applyQuaternion(player.quaternion);
+			const groupPosition = meshWorldPosition.add(offsetPosition);
+			wingsGroup.position.copy(groupPosition);
+			wingsGroup.rotation.copy(player.rotation);
+		}
 
 		window.NarrowSDK.Scene.traverse(function (obj) {
 			if (obj.name.includes("Arrow trail")) {
@@ -617,7 +741,8 @@ window.addEventListener("load", function () {
 		}
 
 		if (settingsBtn === undefined) {
-			settingsBtn = window.NarrowSDK.NarrowUI.CreateMenu("static/img/menuUI/settings.svg", "Extra", StgCallback);
+			settingsBtn = window.NarrowSDK.NarrowUI.CreateMenu("60%", "static/img/menuUI/settings.svg", "Extra", "65454", StgCallback);
+			window.NarrowSDK.NarrowUI.CreateMenu("35%", "static/img/menuUI/shop/categoryIcons/quiver.svg", "Keybinds", "45356", KbsCallback);
 		}
 	}
 

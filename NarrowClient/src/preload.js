@@ -6,9 +6,12 @@ const store = new Store();
 function SettingsSet(key, value) { store.set(key, value); }
 function SettingsGet(key) { return store.get(key); }
 
+let dirname = ipcRenderer.sendSync("client-dirname");
+
 contextBridge.exposeInMainWorld("electronApi", {
     SettingsSet,
-    SettingsGet
+    SettingsGet,
+    dirname
 });
 
 if (!window.cheatLoaded) {

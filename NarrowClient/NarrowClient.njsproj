@@ -36,6 +36,8 @@
     <Content Include="libs\ui.js" />
     <Content Include="package.json" />
     <Content Include="README.md" />
+    <Content Include="src\assets\default_wing.png" />
+    <Content Include="src\assets\paper_wing.png" />
     <Content Include="src\injected\background.js" />
     <Content Include="src\main.js" />
     <Content Include="src\preload.js" />
@@ -43,6 +45,7 @@
   <ItemGroup>
     <Folder Include="src\" />
     <Folder Include="libs\" />
+    <Folder Include="src\assets\" />
     <Folder Include="src\injected\" />
   </ItemGroup>
   <Import Project="$(VSToolsPath)\Node.js Tools\Microsoft.NodejsToolsV2.targets" />

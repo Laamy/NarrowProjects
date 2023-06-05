@@ -37,7 +37,7 @@ window.NarrowSDK = {
 		});
 	},
 	NarrowUI: {
-		CreateMenu: function (icon, title, callback) { // static/img/menuUI/settings.svg
+		CreateMenu: function (backgroundSize, icon, title, seed, callback) { // static/img/menuUI/settings.svg
 			/*
 				Converted to JavaScript by YeemiScript
 			*/
@@ -47,12 +47,12 @@ window.NarrowSDK = {
 			const button = document.createElement("button");
 			button.className = "wrinkledPaper main-menu-button";
 			button.setAttribute("aria-label", title);
-			button.style.setProperty("--wrinkled-paper-seed", "45893");
+			button.style.setProperty("--wrinkled-paper-seed", seed);
 
 			const buttonImage = document.createElement("div");
 			buttonImage.className = "buttonImage";
 			buttonImage.style.backgroundImage = `url("${icon}")`;
-			buttonImage.style.backgroundSize = "60%";
+			buttonImage.style.backgroundSize = backgroundSize;
 
 			button.appendChild(buttonImage);
 			div.appendChild(button);
@@ -71,6 +71,12 @@ window.NarrowSDK = {
 			const xpath = "/html/body/div[2]/div[2]/div[2]";
 			const result = document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
 			const element = result.singleNodeValue;
+
+			// Calculate the position for the new menu button
+			const existingButtons = element.getElementsByClassName("main-menu-button-container extraBtn");
+			const newButtonPosition = existingButtons.length * 75;
+
+			div.style.bottom = newButtonPosition + "px";
 
 			element.appendChild(div);
 
