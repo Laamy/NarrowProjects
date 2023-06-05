@@ -189,6 +189,11 @@ EventTarget.prototype.addEventListener = function (type, listener, options) {
 window.addEventListener("load", function () {
 	console.log(window.NarrowSDK);
 
+	if (window.NarrowSDK.Scene === undefined) {
+		console.log("Fatal error");
+		location.reload();
+	}
+
 	if (SettingsGet('worldtime')) {
 		window.selected = SettingsGet('worldtime');
 	}
