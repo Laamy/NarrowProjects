@@ -225,6 +225,14 @@ window.addEventListener("load", function () {
 		--items-table-odd-row-color: #0000002b;
 	}
 
+	html.theme-amoled .playersListTeam {
+		--wrinkled-paper-color: var(--team-bg-color-dark);
+	}
+
+	html.theme-amoled .gameoverStatsContainer {
+		--wrinkled-paper-color: var(--team-bg-color-dark);
+	}
+
 	html.theme-purple {
 		--default-text-color: #DDDDDD;
 		--disabled-text-color: #59076e;
@@ -241,6 +249,14 @@ window.addEventListener("load", function () {
 		--blue-highlight-color: #aaa9ad;
 		--items-table-bg-color: #630071;
 		--items-table-odd-row-color: #0000002b;
+	}
+
+	html.theme-purple .playersListTeam {
+		--wrinkled-paper-color: var(--team-bg-color-dark);
+	}
+
+	html.theme-purple .gameoverStatsContainer {
+		--wrinkled-paper-color: var(--team-bg-color-dark);
 	}
 
 	`;
