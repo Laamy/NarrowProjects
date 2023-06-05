@@ -94,21 +94,6 @@ NarrowUI = {
 	}
 }
 
-let defaultKeyBindings = { // dont modify this one
-	switchWeapon: "KeyQ", // toggleWeapon
-	playerList: "Tab",
-	toggleThirdPerson: "KeyY",
-	openChat: "KeyT"
-};
-
-// default keybinds
-let keyBindings = {
-	switchWeapon: "KeyQ",
-	playerList: "Tab",
-	toggleThirdPerson: "KeyY",
-	openChat: "KeyT"
-};
-
 NarrowSDK.NarrowUI2D = NarrowUI; // debugging reasons but dont use this reference
 
 function SetUITheme(value) {
@@ -153,32 +138,53 @@ function GetLocalPlayerModel() {
 	return playerModel;
 }
 
+
+let defaultKeyBindings = { // dont modify this one
+	switchWeapon: "KeyQ", // toggleWeapon
+	playerList: "Tab",
+	toggleThirdPerson: "KeyY",
+	openChat: "KeyT"
+};
+
+// default keybinds
+let keyBindings = {
+	switchWeapon: "KeyQ",
+	playerList: "Tab",
+	toggleThirdPerson: "KeyY",
+	openChat: "Enter"
+};
+
 const originalAddEventListener = EventTarget.prototype.addEventListener;
-//EventTarget.prototype.addEventListener = function (type, listener, options) {
-//	const modifiedListener = function (event) {
-//		if (type === 'keyup' || type === 'keydown') {
-//			if (event.code === 'Enter') {
-//				listener.call(this, {
-//					code: defaultKeyBindings.openChat[0],
-//					preventDefault: function () {
-//						event.preventDefault();
-//					}
-//				});
-//			}
+EventTarget.prototype.addEventListener = function (type, listener, options) {
+	const modifiedListener = function (event) {
+		if (type === 'keyup' || type === 'keydown') {
+			if (!(document.activeElement && ["INPUT", "SELECT", "BUTTON"].includes(document.activeElement.tagName))) {
+				Object.keys(keyBindings).forEach(function (key) {
+					if (event.code === keyBindings[key]) {
+						listener.call(this, {
+							code: defaultKeyBindings[key],
+							preventDefault: function () {
+								event.preventDefault();
+							},
+							isCustom: true
+						});
+					}
 
-//			if (event.code === 'KeyT') { // cancel T events
-//				//if (!event.fromCustomCode) {
-//				//	event.preventDefault();
-//				//	return;
-//				//}
-//			}
-//		}
+					if (keyBindings[key] !== defaultKeyBindings[key] && event.code === defaultKeyBindings[key]) {
+						if (!event.isCustom) {
+							event.preventDefault();
+							return; // cancel key event cuz its not one of ours!!
+						}
+					}
+				});
+			}
+		}
 
-//		listener.call(this, event);
-//	};
+		listener.call(this, event);
+	};
 
-//	originalAddEventListener.call(this, type, modifiedListener, options);
-//};
+	originalAddEventListener.call(this, type, modifiedListener, options);
+};
 
 window.addEventListener("load", function () {
 	console.log(window.NarrowSDK);
@@ -565,13 +571,12 @@ window.addEventListener("load", function () {
 			console.log(`Keybind for ${actionName} changed to ${key}`);
 		}
 
-		const chatItem = createKeybindItem("Open Chat", defaultKeyBindings.openChat, changeKeybind);
-		keybindsListDiv.appendChild(chatItem);
-
-		const switchWeaponItem = createKeybindItem("Switch Weapon", defaultKeyBindings.switchWeapon, changeKeybind);
-		keybindsListDiv.appendChild(switchWeaponItem);
-
-		function createKeybindItem(label, defaultKey, onClick) {
+		createKeybindItem("Open Chat", "openChat", keyBindings.openChat, changeKeybind);
+		createKeybindItem("Switch Weapon", "switchWeapon", keyBindings.switchWeapon, changeKeybind);
+		createKeybindItem("Player List", "playerList", keyBindings.playerList, changeKeybind);
+		createKeybindItem("Third Person", "toggleThirdPerson", keyBindings.toggleThirdPerson, changeKeybind);
+		
+		function createKeybindItem(label, keyName, defaultKey, onClick) {
 			const itemDiv = document.createElement("div");
 			itemDiv.className = "keybind-item";
 
@@ -584,19 +589,20 @@ window.addEventListener("load", function () {
 			keyInput.value = defaultKey;
 			keyInput.addEventListener("keydown", function (event) {
 				event.preventDefault();
-				keyInput.value = event.key;
+				keyInput.value = event.code;
 			});
 
 			const saveButton = document.createElement("button");
 			saveButton.textContent = "Save";
 			saveButton.addEventListener("click", function () {
-				onClick(label, keyInput.value);
+				onClick(keyName, keyInput.value);
+				keyBindings[keyName] = keyInput.value;
 			});
 
 			itemDiv.appendChild(keyInput);
 			itemDiv.appendChild(saveButton);
 
-			return itemDiv;
+			keybindsListDiv.appendChild(itemDiv);
 		}
 
 		const dialogButtonsContainerDiv = document.createElement("div");
