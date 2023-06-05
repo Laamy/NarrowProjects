@@ -690,6 +690,8 @@ window.addEventListener("load", function () {
 			const groupPosition = meshWorldPosition.add(offsetPosition);
 			wingsGroup.position.copy(groupPosition);
 			wingsGroup.rotation.copy(player.rotation);
+
+			wingsGroup.visible = player.visible; // third person only
 		}
 
 		window.NarrowSDK.Scene.traverse(function (obj) {
