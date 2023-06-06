@@ -1,6 +1,7 @@
 window.selected = 0;
 window.renderDistance = 3; // default (900 far but i wont be using that)
 window.gameSaturation = "1";
+window.wireBow = true;
 
 const SettingsGet = window.electronApi.SettingsGet;
 const SettingsSet = window.electronApi.SettingsSet;
@@ -105,6 +106,9 @@ NarrowSDK.HandScene = {
 			"Arrow point loaded": {},
 			"merged bow mesh": {},
 			"Arrow": {},
+		},
+		"melee asset loader": {
+			"melee": {}
 		}
 	}
 }
@@ -143,19 +147,15 @@ function SetGameSaturation(amount) {
 	});
 }
 
-function GetFirstPersonObjContainer() {
-	let container = undefined;
-
+function ForEachFirstPersonObjContainer(callback) {
 	for (scene of window.NarrowSDK.SceneStack) {
 		scene.traverse(function (obj2) {
 			if (obj2.name === "FirstPersonObjContainer") {
-				container = obj2;
+				callback(obj2);
 				return;
 			}
 		});
 	}
-
-	return container;
 }
 
 function GetLocalPlayerModel() {
@@ -537,6 +537,30 @@ window.addEventListener("load", function () {
 		}
 
 		{
+			var settingsItemDiv = document.createElement("div");
+			settingsItemDiv.classList.add("settings-item");
+
+			var settingsItemTextDiv = document.createElement("div");
+			settingsItemTextDiv.classList.add("settings-item-text");
+			settingsItemTextDiv.textContent = "Wireframe Hands";
+
+			var inputCheckbox = document.createElement("input");
+			inputCheckbox.setAttribute("type", "checkbox");
+			inputCheckbox.classList.add("dialog-checkbox-input", "wrinkledPaper");
+
+			inputCheckbox.checked = window.wireBow;
+
+			inputCheckbox.addEventListener("change", function (event) {
+				SettingsSet("wireframe-hands", event.target.checked);
+				window.wireBow = event.target.checked;
+			});
+
+			settingsItemDiv.appendChild(settingsItemTextDiv);
+			settingsItemDiv.appendChild(inputCheckbox);
+			settingsListDiv.appendChild(settingsItemDiv);
+		}
+
+		{
 			const settingsGroupHeader = document.createElement("h3");
 			settingsGroupHeader.className = "settings-group-header";
 			settingsGroupHeader.textContent = "Client Settings (Restart Game)";
@@ -583,15 +607,10 @@ window.addEventListener("load", function () {
 			inputCheckbox.setAttribute("type", "checkbox");
 			inputCheckbox.classList.add("dialog-checkbox-input", "wrinkledPaper");
 
-			if (SettingsGet("vsync") !== undefined) {
-				inputCheckbox.checked = SettingsGet("vsync");
-			}
-			else {
-				inputCheckbox.checked = true;
-			}
+			inputCheckbox.checked = window.wireBow;
 
 			inputCheckbox.addEventListener("change", function (event) {
-				SettingsSet("vsync", event.target.checked);
+				SettingsSet("wire", event.target.checked);
 			});
 
 			settingsItemDiv.appendChild(settingsItemTextDiv);
@@ -724,6 +743,8 @@ window.addEventListener("load", function () {
 	const wingsGroup = new THREE.Group();
 	wingsGroup.add(leftWing, rightWing);
 
+	let firstPersonHandMaterial = undefined;
+
 	function calculatePointBehind(pos, rots) {
 		//let scalar = 0.0349;
 		let rotsRad = new THREE.Vector3(0, (rots.y), 0);
@@ -834,6 +855,41 @@ window.addEventListener("load", function () {
 			settingsBtn = window.NarrowSDK.NarrowUI.CreateMenu("60%", "static/img/menuUI/settings.svg", "Extra", "65454", StgCallback);
 			window.NarrowSDK.NarrowUI.CreateMenu("35%", "static/img/menuUI/shop/categoryIcons/quiver.svg", "Keybinds", "45356", KbsCallback);
 		}
+
+		if (firstPersonHandMaterial !== undefined) {
+			firstPersonHandMaterial.wireframe = window.wireBow;
+		}
+
+		ForEachFirstPersonObjContainer(function (firstPersonObjContainer) {
+			try {
+				if (firstPersonObjContainer !== undefined) {
+					if (firstPersonObjContainer.children[0].name == "melee asset loader") {
+						if (firstPersonObjContainer.children[0].children[0]) {
+							firstPersonObjContainer.children[0].children[0].material[0] = firstPersonHandMaterial;
+						}
+					}
+					else {
+						if (firstPersonHandMaterial === undefined) {
+							if (firstPersonObjContainer.children[0].children[2] === undefined) {
+								return; // nope
+							}
+							firstPersonHandMaterial = firstPersonObjContainer.children[0].children[2].material[0].clone();
+						}
+						firstPersonObjContainer.children[0].traverse(function (obj) {
+							if (obj !== undefined && obj.material !== undefined) {
+								if (obj.material.uuid !== undefined) {
+									obj.material[0] = firstPersonHandMaterial;
+								}
+								else {
+									obj.material = firstPersonHandMaterial;
+								}
+							}
+						});
+					}
+				}
+			}
+			catch { }
+		});
 	}
 
 	onFrame();
