@@ -96,6 +96,21 @@ NarrowUI = {
 
 NarrowSDK.NarrowUI2D = NarrowUI; // debugging reasons but dont use this reference
 
+/*
+
+NarrowSDK.HandScene = {
+	"FirstPersonObjContainer": {
+		"Bow asset loader": {
+			"Arrow point idle": {},
+			"Arrow point loaded": {},
+			"merged bow mesh": {},
+			"Arrow": {},
+		}
+	}
+}
+
+*/
+
 function SetUITheme(value) {
 	switch (value) {
 		case "0":
@@ -133,14 +148,15 @@ function GetLocalPlayerModel() {
 
 	window.NarrowSDK.Scene.traverse(function (obj2) {
 		if (playerModel === undefined && obj2.name === "player") {
-			playerModel = obj2;
+			if (obj2.children === 0) {
+				playerModel = obj2;
+			}
 			return;
 		}
 	});
 
 	return playerModel;
 }
-
 
 let defaultKeyBindings = { // dont modify this one
 	switchWeapon: "KeyQ", // toggleWeapon
