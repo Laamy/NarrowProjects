@@ -96,6 +96,10 @@ NarrowUI = {
 	}
 }
 
+let betronaKeybinds = {
+	zoom: "KeyE"
+}
+
 // had to be forked rip
 class InputKey {
 	constructor({
@@ -170,9 +174,7 @@ NarrowSDK.NarrowUI2D = NarrowUI; // debugging reasons but dont use this referenc
 
 const originalBind = Function.prototype.bind;
 Function.prototype.bind = function (thisRef, ...options) {
-
 	if (thisRef.input !== undefined) {
-		// this is the main instance
 		NarrowSDK.Main = thisRef;
 	}
 
@@ -261,6 +263,40 @@ function ShowAlert(msg, title, options) {
 	});
 }
 
+let oldFov;
+
+window.addEventListener("keydown", function (e) {
+	if (NarrowSDK.Main !== undefined) {
+		if (e.code === betronaKeybinds.zoom) {
+			window.NarrowSDK.Scene.traverse(function (obj) {
+				if (obj.name === "cam") {
+					obj.zoom = 8;
+				}
+			});
+
+			ForEachFirstPersonObjContainer(function (obj) {
+				obj.visible = false;
+			});
+		}
+	}
+});
+
+window.addEventListener("keyup", function (e) {
+	if (NarrowSDK.Main !== undefined) {
+		if (e.code === betronaKeybinds.zoom) {
+			window.NarrowSDK.Scene.traverse(function (obj) {
+				if (obj.name === "cam") {
+					obj.zoom = 1;
+				}
+			});
+
+			ForEachFirstPersonObjContainer(function (obj) {
+				obj.visible = true;
+			});
+		}
+	}
+});
+
 window.addEventListener("load", function () {
 	console.log(window.NarrowSDK);
 
@@ -284,7 +320,7 @@ window.addEventListener("load", function () {
 
 	let settingsBtn = undefined;
 
-	let style = document.createElement("style"); // forgot to do the other two elements, my bad !
+	let style = document.createElement("style");
 	style.innerHTML = `
 
 	.extraBtn {
@@ -705,15 +741,26 @@ window.addEventListener("load", function () {
 
 		const dialogTitle = document.createElement("h2");
 		dialogTitle.className = "dialogTitle blueNight";
-		dialogTitle.textContent = "Narrow Keybinds";
+		dialogTitle.textContent = "Game Keybinds";
 		dialogDiv.appendChild(dialogTitle);
 
 		const keybindsListDiv = document.createElement("div");
 		keybindsListDiv.className = "keybinds-list";
 		dialogDiv.appendChild(keybindsListDiv);
 
+		{
+			const settingsGroupHeader = document.createElement("h3");
+			settingsGroupHeader.className = "settings-group-header";
+			settingsGroupHeader.textContent = "Narrow Keybinds";
+			keybindsListDiv.appendChild(settingsGroupHeader);
+		}
+
 		function changeKeybind(actionName, key) {
 			console.log(`Keybind for ${actionName} changed to ${key}`);
+
+			NarrowSDK.Main.input.keys.set(actionName, new InputKey({
+				keyCodes: [key]
+			}))
 		}
 
 		//NarrowSDK.Main.input.getKey("left");
@@ -725,6 +772,19 @@ window.addEventListener("load", function () {
 		createKeybindItem("Switch Weapon", "toggleWeapon", NarrowSDK.Main.input.getKey("toggleWeapon").keyCodes[0], changeKeybind);
 		createKeybindItem("Player List", "playerList", NarrowSDK.Main.input.getKey("playerList").keyCodes[0], changeKeybind);
 		createKeybindItem("Third Person", "toggleThirdPerson", NarrowSDK.Main.input.getKey("toggleThirdPerson").keyCodes[0], changeKeybind);
+
+		{
+			const settingsGroupHeader = document.createElement("h3");
+			settingsGroupHeader.className = "settings-group-header";
+			settingsGroupHeader.textContent = window.clientName + " Keybinds";
+			keybindsListDiv.appendChild(settingsGroupHeader);
+		}
+
+		createKeybindItem("Zoom", "zoomMod", betronaKeybinds.zoom, function (actionName, key) {
+			console.log(`Keybind for ${actionName} changed to ${key}`);
+
+			betronaKeybinds.zoom = key;
+		});
 		
 		function createKeybindItem(label, keyName, defaultKey, onClick) {
 			const itemDiv = document.createElement("div");
@@ -746,9 +806,6 @@ window.addEventListener("load", function () {
 			saveButton.textContent = "Save";
 			saveButton.addEventListener("click", function () {
 				onClick(keyName, keyInput.value);
-				NarrowSDK.Main.input.keys.set(keyName, new InputKey({
-					keyCodes: [keyInput.value]
-				}))
 			});
 
 			itemDiv.appendChild(keyInput);
@@ -784,7 +841,6 @@ window.addEventListener("load", function () {
 	cube.position.z = 114;
 	cube.name = "WayPoint";
 	window.NarrowSDK.Scene.add(cube);
-	//window.NarrowSDK.Scene.autoUpdate = true;
 
 	window.NarrowSDK.Scene.autoUpdate = true;
 
@@ -852,12 +908,6 @@ window.addEventListener("load", function () {
 
 			wingsGroup.visible = player.visible; // third person only
 		}
-
-		//window.NarrowSDK.Scene.traverse(function (obj) {
-		//	if (obj.name.includes("Arrow trail")) {
-		//		// gotta compile my own shader bruh
-		//	}
-		//});
 
 		switch (window.selected) {
 			case "1":
@@ -959,58 +1009,4 @@ window.addEventListener("load", function () {
 	}
 
 	onFrame();
-}); 
-
-//function CreateArrowTrailShader() {
-//	new ShaderMaterial({
-//		name: "narrowClientSkinned",
-//		vertexShader: "",
-//		fragmentShader: "",
-//		uniforms: {
-//			saturation: {
-//				value: 1
-//			},
-//			colorMultiplier: {
-//				value: new Color(1, 1, 1)
-//			},
-//			colorAdder: {
-//				value: new Color(0, 0, 0)
-//			},
-//			skyHighCol: {
-//				value: new Color
-//			},
-//			skyMidCol: {
-//				value: new Color
-//			},
-//			skyLowCol: {
-//				value: new Color
-//			},
-//			skyPower: {
-//				value: 1
-//			},
-//			fogAmount: {
-//				value: .002
-//			},
-//			fogHeightAmount: {
-//				value: 0
-//			},
-//			fogHeightOffset: {
-//				value: 0
-//			},
-//			fogHeightDistFalloff: {
-//				value: 0
-//			},
-//			fogHeightAmountMin: {
-//				value: 0
-//			},
-//			fogHeightAmountMax: {
-//				value: 0
-//			},
-//			...a
-//		},
-//		side: THREE.FrontSide,
-//		vertexColors: true,
-//		depthWrite: true,
-//		depthTest: true
-//	});
-//}
+});
