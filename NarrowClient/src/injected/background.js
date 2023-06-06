@@ -110,6 +110,9 @@ function SetUITheme(value) {
 		case "3":
 			document.documentElement.classList = "theme-purple";
 			break;
+		case "4":
+			document.documentElement.classList = "theme-sapphire";
+			break;
 	}
 }
 
@@ -245,21 +248,21 @@ window.addEventListener("load", function () {
 	}
 
 	html.theme-purple {
-		--default-text-color: #DDDDDD;
-		--disabled-text-color: #59076e;
-		--default-ui-bg-color: #3f024a;
+		--default-text-color: white;
+		--disabled-text-color: #d1d1d1;
+		--default-ui-bg-color: #4e3e5a;
 		--icon-filter: invert(100%);
-		--default-wrinkled-paper-border-color: #490256;
+		--default-wrinkled-paper-border-color: #5d4a6d;
 		--button-on-clear-bg-wrinkled-paper-border-color: #000000;
-		--disabled-wrinkled-paper-border-color: #490256;
-		--default-wrinkled-paper-top-color-extra: #323232;
-		--shop-item-background-color: #3a3a3a;
-		--shop-item-background-color-hover: #580368;
-		--shop-item-background-color-active: #500060;
-		--shop-item-highlight-color: #9c6f2d;
-		--blue-highlight-color: #aaa9ad;
-		--items-table-bg-color: #630071;
-		--items-table-odd-row-color: #0000002b;
+		--disabled-wrinkled-paper-border-color: #72617e;
+		--default-wrinkled-paper-top-color-extra: #78638c;
+		--shop-item-background-color: #72617e;
+		--shop-item-background-color-hover: #9c91a5;
+		--shop-item-background-color-active: #8b7c95;
+		--shop-item-highlight-color: #cfa7d7;
+		--blue-highlight-color: #8c73a7;
+		--items-table-bg-color: #a096b2;
+		--items-table-odd-row-color: #6a597854;
 	}
 
 	html.theme-purple .playersListTeam {
@@ -267,6 +270,32 @@ window.addEventListener("load", function () {
 	}
 
 	html.theme-purple .gameoverStatsContainer {
+		--wrinkled-paper-color: var(--team-bg-color-dark);
+	}
+
+	html.theme-sapphire {
+		--default-text-color: white;
+		--disabled-text-color: #d1d1d1;
+		--default-ui-bg-color: #3f3f64;
+		--icon-filter: invert(100%);
+		--default-wrinkled-paper-border-color: #58587f;
+		--button-on-clear-bg-wrinkled-paper-border-color: #000000;
+		--disabled-wrinkled-paper-border-color: #797995;
+		-default-wrinkled-paper-top-color-extra: #7f7f9a;
+		-shop-item-background-color: #797995;
+		--shop-item-background-color-hover: #a6a6c0;
+		--shop-item-background-color-active: #9696b0;
+		--shop-item-highlight-color: #cfc092;
+		--blue-highlight-color: #5a5acd;
+		--items-table-bg-color: #9494ae;
+		--items-table-odd-row-color: #5a5a805e;
+	}
+
+	html.theme-sapphire .playersListTeam {
+		--wrinkled-paper-color: var(--team-bg-color-dark);
+	}
+
+	html.theme-sapphire .gameoverStatsContainer {
 		--wrinkled-paper-color: var(--team-bg-color-dark);
 	}
 
@@ -447,6 +476,7 @@ window.addEventListener("load", function () {
 				{ value: 1, text: "Light" },
 				{ value: 2, text: "Amoled Black" },
 				{ value: 3, text: "Paper Purple" },
+				{ value: 4, text: "Sapphire Blue" },
 			];
 
 			options.forEach(option => {
@@ -466,6 +496,9 @@ window.addEventListener("load", function () {
 
 			if (document.documentElement.classList == "theme-purple")
 				selectElement.selectedIndex = 3;
+
+			if (document.documentElement.classList == "theme-sapphire")
+				selectElement.selectedIndex = 4;
 
 			selectElement.addEventListener("change", function (event) {
 				SettingsSet("theme", event.target.value);
