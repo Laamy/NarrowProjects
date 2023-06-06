@@ -143,14 +143,27 @@ function SetGameSaturation(amount) {
 	});
 }
 
+function GetFirstPersonObjContainer() {
+	let container = undefined;
+
+	for (scene of window.NarrowSDK.SceneStack) {
+		scene.traverse(function (obj2) {
+			if (obj2.name === "FirstPersonObjContainer") {
+				container = obj2;
+				return;
+			}
+		});
+	}
+
+	return container;
+}
+
 function GetLocalPlayerModel() {
 	let playerModel = undefined;
 
 	window.NarrowSDK.Scene.traverse(function (obj2) {
 		if (playerModel === undefined && obj2.name === "player") {
-			if (obj2.children === 0) {
-				playerModel = obj2;
-			}
+			playerModel = obj2; // i cant figure out a unique way to identify the player
 			return;
 		}
 	});
