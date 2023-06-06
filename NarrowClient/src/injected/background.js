@@ -276,6 +276,10 @@ window.addEventListener("load", function () {
 		--wrinkled-paper-color: var(--team-bg-color-dark);
 	}
 
+	html.theme-amoled .shopItem {
+		--wrinkled-paper-color: #0e0e0e;
+	}
+
 	html.theme-purple {
 		--default-text-color: white;
 		--disabled-text-color: #d1d1d1;
@@ -302,6 +306,10 @@ window.addEventListener("load", function () {
 		--wrinkled-paper-color: var(--team-bg-color-dark);
 	}
 
+	html.theme-purple .shopItem {
+		--wrinkled-paper-color: #3c3045;
+	}
+
 	html.theme-sapphire {
 		--default-text-color: white;
 		--disabled-text-color: #d1d1d1;
@@ -326,6 +334,10 @@ window.addEventListener("load", function () {
 
 	html.theme-sapphire .gameoverStatsContainer {
 		--wrinkled-paper-color: var(--team-bg-color-dark);
+	}
+
+	html.theme-sapphire .shopItem {
+		--wrinkled-paper-color: #363656;
 	}
 
 	`;
