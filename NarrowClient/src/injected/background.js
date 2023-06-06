@@ -476,7 +476,7 @@ window.addEventListener("load", function () {
 				{ value: 1, text: "Light" },
 				{ value: 2, text: "Amoled Black" },
 				{ value: 3, text: "Paper Purple" },
-				{ value: 4, text: "Sapphire Blue" },
+				{ value: 4, text: "Sapphire Blue" }
 			];
 
 			options.forEach(option => {
