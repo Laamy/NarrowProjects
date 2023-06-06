@@ -244,17 +244,14 @@ function ForEachFirstPersonObjContainer(callback) {
 	}
 }
 
-function GetLocalPlayerModel() {
-	let playerModel = undefined;
+function GetLocalPlayer() {
+	let player = undefined;
 
-	window.NarrowSDK.Scene.traverse(function (obj2) {
-		if (playerModel === undefined && obj2.name === "player") {
-			playerModel = obj2; // i cant figure out a unique way to identify the player
-			return;
-		}
-	});
+	if (NarrowSDK.Main.gameManager.activeGame === null || NarrowSDK.Main.gameManager.activeGame.players === undefined) {
+		return undefined;
+	}
 
-	return playerModel;
+	return NarrowSDK.Main.gameManager.activeGame.getMyPlayer();
 }
 
 function ShowAlert(msg, title, options) {
@@ -902,15 +899,19 @@ window.addEventListener("load", function () {
 
 		requestAnimationFrame(onFrame.bind(this));
 
-		let player = GetLocalPlayerModel();
-		if (player !== undefined) {
-			const meshWorldPosition = player.position;
-			const offsetPosition = offset.clone().applyQuaternion(player.quaternion);
-			const groupPosition = meshWorldPosition.add(offsetPosition);
-			wingsGroup.position.copy(groupPosition);
-			wingsGroup.rotation.copy(player.rotation);
+		let localPlayer = GetLocalPlayer();
 
-			wingsGroup.visible = player.visible; // third person only
+		if (localPlayer !== undefined) {
+			let player = localPlayer.obj;
+			if (player !== undefined && player !== null) {
+				const meshWorldPosition = player.position;
+				const offsetPosition = offset.clone().applyQuaternion(player.quaternion);
+				const groupPosition = meshWorldPosition.add(offsetPosition);
+				wingsGroup.position.copy(groupPosition);
+				wingsGroup.rotation.copy(player.rotation);
+
+				wingsGroup.visible = player.visible; // third person only
+			}
 		}
 
 		switch (window.selected) {
