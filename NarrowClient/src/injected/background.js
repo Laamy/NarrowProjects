@@ -2,6 +2,7 @@ window.selected = 0;
 window.renderDistance = 3; // default (900 far but i wont be using that)
 window.gameSaturation = "1";
 window.wireBow = true;
+window.clientName = "Betrona";
 
 const SettingsGet = window.electronApi.SettingsGet;
 const SettingsSet = window.electronApi.SettingsSet;
@@ -95,7 +96,88 @@ NarrowUI = {
 	}
 }
 
+// had to be forked rip
+class InputKey {
+	constructor({
+		keyCodes: t = [],
+		mouseButtons: e = [],
+		gamepadButtons: i = []
+	} = {}) {
+		this.keyCodes = t,
+			this.mouseButtons = e,
+			this.gamepadButtons = i,
+			this.pressed = !1,
+			this.pressedGamepad = !1,
+			this.onPressedChangeCbs = new Set,
+			this.onPressedDownCbs = new Set,
+			this.onPressedUpCbs = new Set
+	}
+	setKeyCodePressed(t, e, i) {
+		let s = !1,
+			n = !1;
+		return this.keyCodes.includes(t) && (n = this.setKeyPressed(e, i), s = !0), {
+			needsPreventDefault: s,
+			preventOthers: n
+		}
+	}
+	setMouseButtonPressed(t, e, i) {
+		return !!this.mouseButtons.includes(t) && this.setKeyPressed(e, i)
+	}
+	setPressedGamepadButtons(t, e) {
+		let i = !1;
+		for (const e of this.gamepadButtons)
+			if (t.includes(e)) {
+				i = !0;
+				break
+			}
+		return this.pressedGamepad != i && (this.pressedGamepad = i, this.setKeyPressed(i, e))
+	}
+	setKeyPressed(t, e = !1) {
+		let i = !1;
+		if (t != this.pressed && (this.pressed = t, !e)) {
+			for (const e of this.onPressedChangeCbs) {
+				e(t) && (i = !0)
+			}
+			if (t)
+				for (const t of this.onPressedDownCbs) {
+					t() && (i = !0)
+				}
+			else
+				for (const t of this.onPressedUpCbs) {
+					t() && (i = !0)
+				}
+		}
+		return i
+	}
+	onPressedChange(t) {
+		this.onPressedChangeCbs.add(t)
+	}
+	onPressedDown(t) {
+		this.onPressedDownCbs.add(t)
+	}
+	onPressedUp(t) {
+		this.onPressedUpCbs.add(t)
+	}
+	removeCb(t) {
+		const e = t;
+		this.onPressedChangeCbs.delete(e),
+			this.onPressedDownCbs.delete(e),
+			this.onPressedUpCbs.delete(e)
+	}
+}
+
 NarrowSDK.NarrowUI2D = NarrowUI; // debugging reasons but dont use this reference
+
+const originalBind = Function.prototype.bind;
+Function.prototype.bind = function (thisRef, ...options) {
+
+	if (thisRef.input !== undefined) {
+		// this is the main instance
+		NarrowSDK.Main = thisRef;
+	}
+
+	return originalBind.call(this, thisRef, ...options);
+}
 
 /*
 
@@ -171,52 +253,13 @@ function GetLocalPlayerModel() {
 	return playerModel;
 }
 
-let defaultKeyBindings = { // dont modify this one
-	switchWeapon: "KeyQ", // toggleWeapon
-	playerList: "Tab",
-	toggleThirdPerson: "KeyY",
-	openChat: "KeyT"
-};
-
-// default keybinds
-let keyBindings = {
-	switchWeapon: "KeyQ",
-	playerList: "Tab",
-	toggleThirdPerson: "KeyY",
-	openChat: "Enter"
-};
-
-const originalAddEventListener = EventTarget.prototype.addEventListener;
-EventTarget.prototype.addEventListener = function (type, listener, options) {
-	const modifiedListener = function (event) {
-		if (type === 'keyup' || type === 'keydown') {
-			if (!(document.activeElement && ["INPUT", "SELECT", "BUTTON"].includes(document.activeElement.tagName))) {
-				Object.keys(keyBindings).forEach(function (key) {
-					if (event.code === keyBindings[key]) {
-						listener.call(this, {
-							code: defaultKeyBindings[key],
-							preventDefault: function () {
-								event.preventDefault();
-							},
-							isCustom: true
-						});
-					}
-
-					if (keyBindings[key] !== defaultKeyBindings[key] && event.code === defaultKeyBindings[key]) {
-						if (!event.isCustom) {
-							event.preventDefault();
-							return; // cancel key event cuz its not one of ours!!
-						}
-					}
-				});
-			}
-		}
-
-		listener.call(this, event);
-	};
-
-	originalAddEventListener.call(this, type, modifiedListener, options);
-};
+function ShowAlert(msg, title, options) {
+	return NarrowSDK.Main.dialogManager.showAlert({
+		title: title,
+		text: msg,
+		buttons: options
+	});
+}
 
 window.addEventListener("load", function () {
 	console.log(window.NarrowSDK);
@@ -354,7 +397,7 @@ window.addEventListener("load", function () {
 
 		const dialogTitle = document.createElement("h2");
 		dialogTitle.className = "dialogTitle blueNight";
-		dialogTitle.textContent = "Narrow Client Settings";
+		dialogTitle.textContent = window.clientName + " Settings";
 		dialogDiv.appendChild(dialogTitle);
 
 		const settingsListDiv = document.createElement("div");
@@ -600,6 +643,8 @@ window.addEventListener("load", function () {
 
 			inputCheckbox.addEventListener("change", function (event) {
 				SettingsSet("adblock", event.target.checked);
+
+				ShowAlert("This setting requires a restart of " + window.clientName, window.clientName, [{ text: "Okay" }]);
 			});
 
 			settingsItemDiv.appendChild(settingsItemTextDiv);
@@ -622,7 +667,9 @@ window.addEventListener("load", function () {
 			inputCheckbox.checked = window.wireBow;
 
 			inputCheckbox.addEventListener("change", function (event) {
-				SettingsSet("wire", event.target.checked);
+				SettingsSet("vsync", event.target.checked);
+
+				ShowAlert("This setting requires a restart of " + window.clientName, window.clientName, [{ text: "Okay" }]);
 			});
 
 			settingsItemDiv.appendChild(settingsItemTextDiv);
@@ -669,10 +716,15 @@ window.addEventListener("load", function () {
 			console.log(`Keybind for ${actionName} changed to ${key}`);
 		}
 
-		createKeybindItem("Open Chat", "openChat", keyBindings.openChat, changeKeybind);
-		createKeybindItem("Switch Weapon", "switchWeapon", keyBindings.switchWeapon, changeKeybind);
-		createKeybindItem("Player List", "playerList", keyBindings.playerList, changeKeybind);
-		createKeybindItem("Third Person", "toggleThirdPerson", keyBindings.toggleThirdPerson, changeKeybind);
+		//NarrowSDK.Main.input.getKey("left");
+		//NarrowSDK.Main.input.keys.set("left", new InputKey({
+		//	keyCodes: ["KeyA", "ArrowLeft"]
+		//}))
+
+		createKeybindItem("Open Chat", "chat", NarrowSDK.Main.input.getKey("chat").keyCodes[0], changeKeybind);
+		createKeybindItem("Switch Weapon", "toggleWeapon", NarrowSDK.Main.input.getKey("toggleWeapon").keyCodes[0], changeKeybind);
+		createKeybindItem("Player List", "playerList", NarrowSDK.Main.input.getKey("playerList").keyCodes[0], changeKeybind);
+		createKeybindItem("Third Person", "toggleThirdPerson", NarrowSDK.Main.input.getKey("toggleThirdPerson").keyCodes[0], changeKeybind);
 		
 		function createKeybindItem(label, keyName, defaultKey, onClick) {
 			const itemDiv = document.createElement("div");
@@ -694,7 +746,9 @@ window.addEventListener("load", function () {
 			saveButton.textContent = "Save";
 			saveButton.addEventListener("click", function () {
 				onClick(keyName, keyInput.value);
-				keyBindings[keyName] = keyInput.value;
+				NarrowSDK.Main.input.keys.set(keyName, new InputKey({
+					keyCodes: [keyInput.value]
+				}))
 			});
 
 			itemDiv.appendChild(keyInput);
