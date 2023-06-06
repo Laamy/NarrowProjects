@@ -174,8 +174,10 @@ NarrowSDK.NarrowUI2D = NarrowUI; // debugging reasons but dont use this referenc
 
 const originalBind = Function.prototype.bind;
 Function.prototype.bind = function (thisRef, ...options) {
-	if (thisRef.input !== undefined) {
-		NarrowSDK.Main = thisRef;
+	if (thisRef !== undefined && thisRef !== null) {
+		if (thisRef.input !== undefined) {
+			NarrowSDK.Main = thisRef;
+		}
 	}
 
 	return originalBind.call(this, thisRef, ...options);
@@ -304,6 +306,8 @@ window.addEventListener("load", function () {
 		console.log("Fatal error");
 		location.reload();
 	}
+
+	NarrowSDK.Main.poki.commercialBreak = function () { }
 
 	if (SettingsGet('worldtime')) {
 		window.selected = SettingsGet('worldtime');
@@ -674,7 +678,7 @@ window.addEventListener("load", function () {
 				inputCheckbox.checked = SettingsGet("adblock");
 			}
 			else {
-				inputCheckbox.checked = true;
+				inputCheckbox.checked = false; // by default disabled
 			}
 
 			inputCheckbox.addEventListener("change", function (event) {
