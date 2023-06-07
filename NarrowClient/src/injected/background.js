@@ -320,6 +320,30 @@ window.addEventListener("load", function () {
 		window.gameSaturation = SettingsGet('mapsaturation');
 	}
 
+	if (SettingsGet("keybinds.chat")) {
+		NarrowSDK.Main.input.keys.set("chat", new InputKey({
+			keyCodes: [SettingsGet("keybinds.chat")]
+		}))
+	}
+	if (SettingsGet("keybinds.toggleWeapon")) {
+		NarrowSDK.Main.input.keys.set("toggleWeapon", new InputKey({
+			keyCodes: [SettingsGet("keybinds.toggleWeapon")]
+		}))
+	}
+	if (SettingsGet("keybinds.playerList")) {
+		NarrowSDK.Main.input.keys.set("playerList", new InputKey({
+			keyCodes: [SettingsGet("keybinds.playerList")]
+		}))
+	}
+	if (SettingsGet("keybinds.toggleThirdPerson")) {
+		NarrowSDK.Main.input.keys.set("toggleThirdPerson", new InputKey({
+			keyCodes: [SettingsGet("keybinds.toggleThirdPerson")]
+		}))
+	}
+	if (SettingsGet("keybinds.zoomMod")) {
+		betronaKeybinds.zoom = SettingsGet("keybinds.zoomMod");
+	}
+
 	let settingsBtn = undefined;
 
 	let style = document.createElement("style");
@@ -784,6 +808,8 @@ window.addEventListener("load", function () {
 		function changeKeybind(actionName, key) {
 			console.log(`Keybind for ${actionName} changed to ${key}`);
 
+			SettingsSet("keybinds." + actionName, key);
+
 			NarrowSDK.Main.input.keys.set(actionName, new InputKey({
 				keyCodes: [key]
 			}))
@@ -808,6 +834,8 @@ window.addEventListener("load", function () {
 
 		createKeybindItem("Zoom", "zoomMod", betronaKeybinds.zoom, function (actionName, key) {
 			console.log(`Keybind for ${actionName} changed to ${key}`);
+
+			SettingsSet("keybinds." + actionName, key);
 
 			betronaKeybinds.zoom = key;
 		});
