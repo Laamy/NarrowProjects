@@ -49,18 +49,18 @@ if (settings.get("vsync") === false) {
 app.on('ready', () => {
 	const appSession = session.defaultSession;
 
-	//appSession.webRequest.onBeforeRequest((details, callback) => {
-	//	const { method, url } = details;
+	appSession.webRequest.onBeforeRequest((details, callback) => {
+		const { method, url } = details;
 
-	//	let cancelled = false;
+		let cancelled = false;
 
-	//	if (url.includes("poki.com") &&
-	//		(settings.get("adblock") === undefined || settings.get("adblock") === true)) {
-	//		cancelled = true;
-	//	}
+		if (url.includes("poki.com") &&
+			(settings.get("adblock") === undefined || settings.get("adblock") === true)) {
+			cancelled = true;
+		}
 
-	//	callback({ cancel: cancelled });
-	//});
+		callback({ cancel: cancelled });
+	});
 
 	const mainWindow = new BrowserWindow({
 		width: 800,

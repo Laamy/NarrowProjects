@@ -37,6 +37,8 @@
     <Content Include="package.json" />
     <Content Include="README.md" />
     <Content Include="src\assets\default_wing.png" />
+    <Content Include="src\assets\icon.ico" />
+    <Content Include="src\assets\icon.png" />
     <Content Include="src\assets\paper_wing.png" />
     <Content Include="src\injected\background.js" />
     <Content Include="src\main.js" />

@@ -1,5 +1,5 @@
 {
-  "name": "narrow-client",
+  "name": "betrona-client",
   "version": "1.0.0",
   "description": "NarrowClient",
   "main": "src\\main.js",
@@ -7,12 +7,39 @@
     "name": "YeemiRouth"
   },
   "scripts": {
-    "start": "electron-forge start"
+    "start": "electron-forge start",
+    "build": "npx electron-builder"
   },
   "dependencies": {
     "electron-localshortcut": "^3.2.1",
     "electron-squirrel-startup": "^1.0.0",
     "electron-store": "^8.1.0"
+  },
+  "build": {
+    "appId": "com.yeemirouth.betrona",
+    "productName": "Betrona Client",
+    "directories": {
+      "output": "build"
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "src/assets/build/icon.icns"
+    },
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "icon": "src/assets/build/icon.ico"
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb",
+        "rpm"
+      ],
+      "icon": "src/assets/build/icon.png"
+    }
   },
   "devDependencies": {
     "@electron-forge/cli": "^6.0.4",
@@ -20,7 +47,8 @@
     "@electron-forge/maker-rpm": "^6.0.4",
     "@electron-forge/maker-squirrel": "^6.0.4",
     "@electron-forge/maker-zip": "^6.0.4",
-    "electron": "22.0.0"
+    "electron": "22.0.0",
+    "electron-builder": "^23.6.0"
   },
   "eslintConfig": {}
 }

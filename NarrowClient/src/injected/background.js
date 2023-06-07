@@ -701,7 +701,7 @@ window.addEventListener("load", function () {
 			inputCheckbox.setAttribute("type", "checkbox");
 			inputCheckbox.classList.add("dialog-checkbox-input", "wrinkledPaper");
 
-			inputCheckbox.checked = window.wireBow;
+			inputCheckbox.checked = false;
 
 			inputCheckbox.addEventListener("change", function (event) {
 				SettingsSet("vsync", event.target.checked);
