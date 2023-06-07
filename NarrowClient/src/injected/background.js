@@ -901,7 +901,10 @@ window.addEventListener("load", function () {
 
 		let localPlayer = GetLocalPlayer();
 
-		if (localPlayer !== undefined) {
+		if (localPlayer !== undefined && localPlayer !== null) { // dont play around with crosshair class
+			//NarrowSDK.Main.gameManager.activeGame.crosshair.smoothAccuracy = -90;
+			//NarrowSDK.Main.gameManager.activeGame.crosshair.currentAccuracy = -90;
+
 			let player = localPlayer.obj;
 			if (player !== undefined && player !== null) {
 				const meshWorldPosition = player.position;
