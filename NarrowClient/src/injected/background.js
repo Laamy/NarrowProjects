@@ -3,6 +3,7 @@ window.renderDistance = 3; // default (900 far but i wont be using that)
 window.gameSaturation = "1";
 window.wireBow = true;
 window.clientName = "Betrona";
+window.removeTrails = false;
 
 const SettingsGet = window.electronApi.SettingsGet;
 const SettingsSet = window.electronApi.SettingsSet;
@@ -568,6 +569,54 @@ window.addEventListener("load", function () {
 		}
 
 		{
+			var settingsItemDiv = document.createElement("div");
+			settingsItemDiv.classList.add("settings-item");
+
+			var settingsItemTextDiv = document.createElement("div");
+			settingsItemTextDiv.classList.add("settings-item-text");
+			settingsItemTextDiv.textContent = "Wireframe Hands";
+
+			var inputCheckbox = document.createElement("input");
+			inputCheckbox.setAttribute("type", "checkbox");
+			inputCheckbox.classList.add("dialog-checkbox-input", "wrinkledPaper");
+
+			inputCheckbox.checked = window.wireBow;
+
+			inputCheckbox.addEventListener("change", function (event) {
+				SettingsSet("wireframe-hands", event.target.checked);
+				window.wireBow = event.target.checked;
+			});
+
+			settingsItemDiv.appendChild(settingsItemTextDiv);
+			settingsItemDiv.appendChild(inputCheckbox);
+			settingsListDiv.appendChild(settingsItemDiv);
+		}
+
+		{
+			var settingsItemDiv = document.createElement("div");
+			settingsItemDiv.classList.add("settings-item");
+
+			var settingsItemTextDiv = document.createElement("div");
+			settingsItemTextDiv.classList.add("settings-item-text");
+			settingsItemTextDiv.textContent = "Arrow Trails";
+
+			var inputCheckbox = document.createElement("input");
+			inputCheckbox.setAttribute("type", "checkbox");
+			inputCheckbox.classList.add("dialog-checkbox-input", "wrinkledPaper");
+
+			inputCheckbox.checked = window.removeTrails;
+
+			inputCheckbox.addEventListener("change", function (event) {
+				SettingsSet("arrow-trails", event.target.checked);
+				window.removeTrails = event.target.checked;
+			});
+
+			settingsItemDiv.appendChild(settingsItemTextDiv);
+			settingsItemDiv.appendChild(inputCheckbox);
+			settingsListDiv.appendChild(settingsItemDiv);
+		}
+
+		{
 			const settingsGroupHeader = document.createElement("h3");
 			settingsGroupHeader.className = "settings-group-header";
 			settingsGroupHeader.textContent = "UI Visuals";
@@ -626,30 +675,6 @@ window.addEventListener("load", function () {
 
 				SetUITheme(event.target.value);
 			});
-		}
-
-		{
-			var settingsItemDiv = document.createElement("div");
-			settingsItemDiv.classList.add("settings-item");
-
-			var settingsItemTextDiv = document.createElement("div");
-			settingsItemTextDiv.classList.add("settings-item-text");
-			settingsItemTextDiv.textContent = "Wireframe Hands";
-
-			var inputCheckbox = document.createElement("input");
-			inputCheckbox.setAttribute("type", "checkbox");
-			inputCheckbox.classList.add("dialog-checkbox-input", "wrinkledPaper");
-
-			inputCheckbox.checked = window.wireBow;
-
-			inputCheckbox.addEventListener("change", function (event) {
-				SettingsSet("wireframe-hands", event.target.checked);
-				window.wireBow = event.target.checked;
-			});
-
-			settingsItemDiv.appendChild(settingsItemTextDiv);
-			settingsItemDiv.appendChild(inputCheckbox);
-			settingsListDiv.appendChild(settingsItemDiv);
 		}
 
 		{
@@ -959,6 +984,12 @@ window.addEventListener("load", function () {
 						obj.scale.y = 1;
 						obj.scale.z = 1;
 						break;
+				}
+			}
+
+			if (window.removeTrails) {
+				if (obj.name.includes("Arrow trail")) {
+					obj.visible = false;
 				}
 			}
 		});
