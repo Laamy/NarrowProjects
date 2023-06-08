@@ -5,6 +5,8 @@ window.wireBow = true;
 window.clientName = "Betrona";
 window.removeTrails = false;
 
+window.adSkip = true; // set to false in public builds cuz I feel bad for making this in the first place lol..
+
 const SettingsGet = window.electronApi.SettingsGet;
 const SettingsSet = window.electronApi.SettingsSet;
 
@@ -297,6 +299,29 @@ window.addEventListener("keyup", function (e) {
 	}
 });
 
+function showNotification(text) {
+	let _this = NarrowSDK.Main.gameManager.activeGame.scoreOffsetNotificationsUi;
+
+	let s = .5;
+
+	const n = document.createElement("div");
+	n.classList.add("scoreOffsetNotification"),
+		_this.listEl.appendChild(n),
+		_this.createdNotifications.unshift({
+			el: n,
+			destroyTime: Date.now() + 1e3 * s + 1e3
+		});
+
+	const a = document.createElement("div");
+	if (a.classList.add("scoreOffsetNotificationAnim"), a.style.animation = `1s notificationIconFade ${s}s both, 0.2s notificationIconPop`, n.appendChild(a)) {
+		const t = document.createTextNode(text);
+		a.appendChild(t);
+	}
+
+	_this.destroyOldNotifications();
+	_this.updateNotificationOffsets();
+}
+
 window.addEventListener("load", function () {
 	console.log(window.NarrowSDK);
 
@@ -306,8 +331,11 @@ window.addEventListener("load", function () {
 	}
 
 	NarrowSDK.Main.poki.commercialBreak = function () { }
-	NarrowSDK.Main.poki.rewardedBreak = function () {
-		return { success: true };
+
+	if (window.adSkip) {
+		NarrowSDK.Main.poki.rewardedBreak = function () {
+			return { success: true };
+		}
 	}
 
 	if (SettingsGet('worldtime')) {
