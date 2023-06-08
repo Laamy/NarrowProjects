@@ -306,6 +306,9 @@ window.addEventListener("load", function () {
 	}
 
 	NarrowSDK.Main.poki.commercialBreak = function () { }
+	NarrowSDK.Main.poki.rewardedBreak = function () {
+		return { success: true };
+	}
 
 	if (SettingsGet('worldtime')) {
 		window.selected = SettingsGet('worldtime');
