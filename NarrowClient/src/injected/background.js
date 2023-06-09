@@ -1318,6 +1318,9 @@ window.addEventListener("load", function () {
 				wingsGroup.visible = player.visible; // third person only
 			}
 		}
+		else {
+			wingsGroup.position.y = -100;
+		}
 
 		switch (window.selected) {
 			case "1":
