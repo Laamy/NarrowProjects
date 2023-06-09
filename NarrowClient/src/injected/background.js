@@ -1,5 +1,5 @@
 // DONT TOUCH
-window.environment = "dev-roaming"; // "dev", "dev-roaming", "release"
+window.environment = "dev"; // "dev", "dev-roaming", "release"
 
 window.selected = 0;
 window.renderDistance = 3; // default (900 far but i wont be using that)
@@ -1299,7 +1299,7 @@ window.addEventListener("load", function () {
 
 		requestAnimationFrame(onFrame.bind(this));
 
-		NarrowSDK.Main.renderer.renderer.shadowMap.render(NarrowSDK.Scene, NarrowSDK.Main.cam.cam, [light]);
+		//NarrowSDK.Main.renderer.renderer.shadowMap.render(NarrowSDK.Scene, NarrowSDK.Main.cam.cam, [light]);
 
 		let localPlayer = GetLocalPlayer();
 
