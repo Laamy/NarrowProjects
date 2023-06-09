@@ -1,3 +1,6 @@
+// DONT TOUCH
+window.environment = "dev"; // "dev", "dev-roaming", "release"
+
 window.selected = 0;
 window.renderDistance = 3; // default (900 far but i wont be using that)
 window.gameSaturation = "1";
@@ -442,7 +445,16 @@ window.addEventListener("load", function () {
 		location.reload();
 	}
 
-	//NarrowSDK.Main.network.connect = function () { }
+	let NetworkManagerPrototype = Object.getPrototypeOf(NarrowSDK.Main.network)
+
+	let origConnect = NetworkManagerPrototype.connect;
+	NetworkManagerPrototype.connect = function (...options) {
+		if (window.environment == "dev-roaming") {
+			return;
+		}
+
+		origConnect.call(this, ...options);
+	}
 
 	//let origLoadMap = NarrowSDK.Main.mapLoader.loadMap;
 	//NarrowSDK.Main.mapLoader.loadMap = function (t, e) {
