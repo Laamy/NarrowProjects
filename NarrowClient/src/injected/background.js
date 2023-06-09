@@ -174,6 +174,28 @@ class InputKey {
 }
 
 NarrowSDK.NarrowUI2D = NarrowUI; // debugging reasons but dont use this reference
+NarrowSDK.LoadNarrowMap = function (cfg) {
+	const SetupMap = t => {
+		let _this = NarrowSDK.Main.gameManager.activeGame;
+
+		if ("colliders" == t.type) {
+			_this.physics.removeMapColliders();
+			for (const e of t.colliders)
+				_this.physics.addMapCollider(e);
+			_this.physics.buildOctree(),
+				_this.receivedColliders = !0,
+				_this.updateGameIsVisible()
+		} else
+			"scene" == t.type && (_this.destructed ? MapLoader.disposeMapGeometries(t.scene) : _this.setMapScene(t.scene), _this.hingeManager.setHingeObjects(t.hinges))
+	};
+
+	NarrowSDK.Main.mapLoader.loadMap({
+		request: {
+			type: "config",
+			config: cfg
+		}
+	}, SetupMap);
+}
 
 const originalBind = Function.prototype.bind;
 Function.prototype.bind = function (thisRef, ...options) {
@@ -419,6 +441,18 @@ window.addEventListener("load", function () {
 		console.log("Fatal error");
 		location.reload();
 	}
+
+	//NarrowSDK.Main.network.connect = function () { }
+
+	//let origLoadMap = NarrowSDK.Main.mapLoader.loadMap;
+	//NarrowSDK.Main.mapLoader.loadMap = function (t, e) {
+	//	//let origMapSetup = e;
+	//	//e = function (arg) {
+	//	//	console.log(arg);
+	//	//}
+
+	//	origLoadMap.call(this, t, e);
+	//}
 
 	NarrowSDK.Main.poki.commercialBreak = function () { }
 
@@ -1056,6 +1090,27 @@ window.addEventListener("load", function () {
 	window.NarrowSDK.Scene.add(wingsGroup);
 
 	const offset = new THREE.Vector3(0, 1.3, -0.2);
+
+	let OfflineRoamingProtoType = Object.getPrototypeOf(NarrowSDK.Main.gameManager.activeGame)
+
+	let origOfflineRoamingLoadMap = OfflineRoamingProtoType.loadMap;
+	OfflineRoamingProtoType.loadMap = function () {
+		origOfflineRoamingLoadMap.call(this);
+
+		// load different map
+		NarrowSDK.LoadNarrowMap({
+			assetName: "narrowDesert",
+			configHash: "f01470ea7de17cdd4a725471719eee453b157c968ae3ffd04c71d84a5f85abf9",
+			Hash: "3bbbfa0118cd68ad1b46d2f493583344850ea7bf5702195737b381d1610d979b",
+			isNasset: true,
+			name: "desert",
+			size: 2733379,
+		});
+	}
+
+	NarrowSDK.Main.gameManager.activeGame.loadMap();
+
+	console.log(NarrowSDK.Main.gameManager.activeGame.Prototype);
 
 	function onFrame() {
 		if (NarrowUI.context === null) {
