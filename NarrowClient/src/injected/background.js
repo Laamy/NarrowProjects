@@ -7,6 +7,8 @@ window.gameSaturation = "1";
 window.wireBow = true;
 window.clientName = "Betrona";
 window.removeTrails = false;
+window.customMainMenu = true;
+window.randomMainMenu = false;
 
 window.adSkip = true; // set to false in public builds cuz I feel bad for making this in the first place lol..
 
@@ -565,6 +567,50 @@ function parseStringMessage(t, e = 4) {
 window.addEventListener("load", function () {
 	console.log(window.NarrowSDK);
 
+	NarrowSDK.Main.poki.commercialBreak = function () { }
+
+	if (window.adSkip) {
+		NarrowSDK.Main.poki.rewardedBreak = function () {
+			return { success: true };
+		}
+	}
+
+	if (SettingsGet('worldtime')) {
+		window.selected = SettingsGet('worldtime');
+	}
+	if (SettingsGet('renderdistance')) {
+		window.renderDistance = SettingsGet('renderdistance');
+	}
+	if (SettingsGet('theme')) {
+		SetUITheme(SettingsGet('theme'));
+	}
+	if (SettingsGet('mapsaturation')) {
+		window.gameSaturation = SettingsGet('mapsaturation');
+	}
+
+	if (SettingsGet("keybinds.chat")) {
+		NarrowSDK.SetKeybind("chat", [SettingsGet("keybinds.chat")]);
+	}
+	if (SettingsGet("keybinds.toggleWeapon")) {
+		NarrowSDK.SetKeybind("toggleWeapon", [SettingsGet("keybinds.toggleWeapon")]);
+	}
+	if (SettingsGet("keybinds.playerList")) {
+		NarrowSDK.SetKeybind("playerList", [SettingsGet("keybinds.playerList")]);
+	}
+	if (SettingsGet("keybinds.toggleThirdPerson")) {
+		NarrowSDK.SetKeybind("toggleThirdPerson", [SettingsGet("keybinds.toggleThirdPerson")]);
+	}
+	if (SettingsGet("keybinds.zoomMod")) {
+		betronaKeybinds.zoom = SettingsGet("keybinds.zoomMod");
+	}
+
+	if (SettingsGet("mainmenu.enabled") !== undefined) { // modified main menu settings stuff
+		window.customMainMenu = SettingsGet("mainmenu.enabled");
+	}
+	if (SettingsGet("mainmenu.random") !== undefined) {
+		window.randomMainMenu = SettingsGet("mainmenu.random");
+	}
+
 	if (window.NarrowSDK.Scene === undefined) {
 		console.log("Fatal error");
 		location.reload();
@@ -603,10 +649,17 @@ window.addEventListener("load", function () {
 	let OfflineRoamingProtoType = Object.getPrototypeOf(NarrowSDK.Main.gameManager.activeGame);
 	let origOfflineRoamingLoadMap = OfflineRoamingProtoType.loadMap;
 	OfflineRoamingProtoType.loadMap = function () {
-		NarrowSDK.Main.mainMenu.makeMainMenuVisibleFromUserGesture();
+		NarrowSDK.Main.mainMenu.makeMainMenuVisibleFromUserGesture(); // gonna keep this as default
 
 		// load different map
-		NarrowSDK.LoadNarrowMap(NarrowMaps.maps[8]); // castles (0-15) - Math.floor(Math.random() * 16)
+		if (window.customMainMenu) {
+			if (window.randomMainMenu) {
+				NarrowSDK.LoadNarrowMap(NarrowMaps.maps[Math.floor(Math.random() * 16)]);
+			}
+			else {
+				NarrowSDK.LoadNarrowMap(NarrowMaps.maps[8]); // castles (0-15)
+			}
+		}
 	}
 
 	NarrowSDK.Main.gameManager.activeGame.loadMap();
@@ -631,43 +684,6 @@ window.addEventListener("load", function () {
 
 	//	origLoadMap.call(this, t, e);
 	//}
-
-	NarrowSDK.Main.poki.commercialBreak = function () { }
-
-	if (window.adSkip) {
-		NarrowSDK.Main.poki.rewardedBreak = function () {
-			return { success: true };
-		}
-	}
-
-	if (SettingsGet('worldtime')) {
-		window.selected = SettingsGet('worldtime');
-	}
-	if (SettingsGet('renderdistance')) {
-		window.renderDistance = SettingsGet('renderdistance');
-	}
-	if (SettingsGet('theme')) {
-		SetUITheme(SettingsGet('theme'));
-	}
-	if (SettingsGet('mapsaturation')) {
-		window.gameSaturation = SettingsGet('mapsaturation');
-	}
-
-	if (SettingsGet("keybinds.chat")) {
-		NarrowSDK.SetKeybind("chat", [SettingsGet("keybinds.chat")]);
-	}
-	if (SettingsGet("keybinds.toggleWeapon")) {
-		NarrowSDK.SetKeybind("toggleWeapon", [SettingsGet("keybinds.toggleWeapon")]);
-	}
-	if (SettingsGet("keybinds.playerList")) {
-		NarrowSDK.SetKeybind("playerList", [SettingsGet("keybinds.playerList")]);
-	}
-	if (SettingsGet("keybinds.toggleThirdPerson")) {
-		NarrowSDK.SetKeybind("toggleThirdPerson", [SettingsGet("keybinds.toggleThirdPerson")]);
-	}
-	if (SettingsGet("keybinds.zoomMod")) {
-		betronaKeybinds.zoom = SettingsGet("keybinds.zoomMod");
-	}
 
 	let settingsBtn = undefined;
 
@@ -941,6 +957,7 @@ window.addEventListener("load", function () {
 			settingsListDiv.appendChild(settingsItemDiv);
 		}
 
+
 		{
 			var settingsItemDiv = document.createElement("div");
 			settingsItemDiv.classList.add("settings-item");
@@ -958,6 +975,61 @@ window.addEventListener("load", function () {
 			inputCheckbox.addEventListener("change", function (event) {
 				SettingsSet("arrow-trails", event.target.checked);
 				window.removeTrails = event.target.checked;
+			});
+
+			settingsItemDiv.appendChild(settingsItemTextDiv);
+			settingsItemDiv.appendChild(inputCheckbox);
+			settingsListDiv.appendChild(settingsItemDiv);
+		}
+
+		{
+			const settingsGroupHeader = document.createElement("h3");
+			settingsGroupHeader.className = "settings-group-header";
+			settingsGroupHeader.textContent = "Main Menu";
+			settingsListDiv.appendChild(settingsGroupHeader);
+		}
+
+		{
+			var settingsItemDiv = document.createElement("div");
+			settingsItemDiv.classList.add("settings-item");
+
+			var settingsItemTextDiv = document.createElement("div");
+			settingsItemTextDiv.classList.add("settings-item-text");
+			settingsItemTextDiv.textContent = "Custom MainMenu";
+
+			var inputCheckbox = document.createElement("input");
+			inputCheckbox.setAttribute("type", "checkbox");
+			inputCheckbox.classList.add("dialog-checkbox-input", "wrinkledPaper");
+
+			inputCheckbox.checked = window.customMainMenu;
+
+			inputCheckbox.addEventListener("change", function (event) {
+				SettingsSet("mainmenu.enabled", event.target.checked);
+				window.customMainMenu = event.target.checked;
+			});
+
+			settingsItemDiv.appendChild(settingsItemTextDiv);
+			settingsItemDiv.appendChild(inputCheckbox);
+			settingsListDiv.appendChild(settingsItemDiv);
+		}
+
+		{
+			var settingsItemDiv = document.createElement("div");
+			settingsItemDiv.classList.add("settings-item");
+
+			var settingsItemTextDiv = document.createElement("div");
+			settingsItemTextDiv.classList.add("settings-item-text");
+			settingsItemTextDiv.textContent = "Randomize MainMenu";
+
+			var inputCheckbox = document.createElement("input");
+			inputCheckbox.setAttribute("type", "checkbox");
+			inputCheckbox.classList.add("dialog-checkbox-input", "wrinkledPaper");
+
+			inputCheckbox.checked = window.randomMainMenu;
+
+			inputCheckbox.addEventListener("change", function (event) {
+				SettingsSet("mainmenu.random", event.target.checked);
+				window.randomMainMenu = event.target.checked;
 			});
 
 			settingsItemDiv.appendChild(settingsItemTextDiv);
@@ -1266,14 +1338,14 @@ window.addEventListener("load", function () {
 			NarrowUI.init();
 		}
 
-		if (window.NarrowSDK.Scene !== undefined) {
-			// draw essentials here
-			let width = NarrowUI.canvas.width;
-			let height = NarrowUI.canvas.height;
+		//if (window.NarrowSDK.Scene !== undefined) {
+		//	// draw essentials here
+		//	let width = NarrowUI.canvas.width;
+		//	let height = NarrowUI.canvas.height;
 
-			NarrowUI.clearCanvas(); // clear last frame drawings
-			//NarrowUI.drawText(`NarrowClient`, width - 250, 160, 16, "blue");
-		}
+		//	NarrowUI.clearCanvas(); // clear last frame drawings
+		//	//NarrowUI.drawText(`NarrowClient`, width - 250, 160, 16, "blue");
+		//}
 
 		//for (const e of NarrowSDK.Main.materials.allMaterials()) {
 		//	e.uniforms.colorMultiplier.value.set(new THREE.Color(1.4, 1.4, 1.4));
