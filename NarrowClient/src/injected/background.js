@@ -296,6 +296,11 @@ class InputKey {
 	}
 }
 
+NarrowSDK.SetKeybind = function (tag, keys) {
+	let oldKey = NarrowSDK.Main.input.getKey("toggleThirdPerson");
+	oldKey.keyCodes = [SettingsGet("keybinds.toggleThirdPerson")];
+}
+
 NarrowSDK.NarrowUI2D = NarrowUI; // debugging reasons but dont use this reference
 NarrowSDK.LoadNarrowMap = function (cfg) {
 	const SetupMap = t => {
@@ -581,9 +586,6 @@ window.addEventListener("load", function () {
 				powerPreference: "high-performance",
 				alpha: true
 			});
-
-			//_this.renderer.shadowMap.enabled = true;
-			//_this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 		} catch (e) {
 			console.error("Failed to create WebGLRenderer:", t);
 			_this.webglCreationFailed = true;
@@ -594,20 +596,6 @@ window.addEventListener("load", function () {
 			_this.updateSmoothFiltering(),
 			_this.onResize()
 	}
-
-	//const light = new THREE.DirectionalLight(0xffffff, 1);
-	//light.position.set(0, 100, 0);
-	//light.castShadow = true;
-	//light.shadow.mapSize.width = 1024; // Adjust the shadow map size as needed
-	//light.shadow.mapSize.height = 1024;
-	//light.shadow.camera.near = 0.5; // Adjust the near and far planes of the shadow camera
-	//light.shadow.camera.far = 500;
-	//light.shadow.camera.left = -10; // Adjust the frustum of the shadow camera if needed
-	//light.shadow.camera.right = 10;
-	//light.shadow.camera.top = 10;
-	//light.shadow.camera.bottom = -10;
-	////light.shadow.camera = NarrowSDK.Main.cam.cam;
-	//NarrowSDK.Scene.add(light);
 
 	NarrowSDK.Main.renderer.reloadRenderer();
 
@@ -666,24 +654,16 @@ window.addEventListener("load", function () {
 	}
 
 	if (SettingsGet("keybinds.chat")) {
-		NarrowSDK.Main.input.keys.set("chat", new InputKey({
-			keyCodes: [SettingsGet("keybinds.chat")]
-		}))
+		NarrowSDK.SetKeybind("chat", [SettingsGet("keybinds.chat")]);
 	}
 	if (SettingsGet("keybinds.toggleWeapon")) {
-		NarrowSDK.Main.input.keys.set("toggleWeapon", new InputKey({
-			keyCodes: [SettingsGet("keybinds.toggleWeapon")]
-		}))
+		NarrowSDK.SetKeybind("toggleWeapon", [SettingsGet("keybinds.toggleWeapon")]);
 	}
 	if (SettingsGet("keybinds.playerList")) {
-		NarrowSDK.Main.input.keys.set("playerList", new InputKey({
-			keyCodes: [SettingsGet("keybinds.playerList")]
-		}))
+		NarrowSDK.SetKeybind("playerList", [SettingsGet("keybinds.playerList")]);
 	}
 	if (SettingsGet("keybinds.toggleThirdPerson")) {
-		NarrowSDK.Main.input.keys.set("toggleThirdPerson", new InputKey({
-			keyCodes: [SettingsGet("keybinds.toggleThirdPerson")]
-		}))
+		NarrowSDK.SetKeybind("toggleThirdPerson", [SettingsGet("keybinds.toggleThirdPerson")]);
 	}
 	if (SettingsGet("keybinds.zoomMod")) {
 		betronaKeybinds.zoom = SettingsGet("keybinds.zoomMod");
@@ -1155,9 +1135,7 @@ window.addEventListener("load", function () {
 
 			SettingsSet("keybinds." + actionName, key);
 
-			NarrowSDK.Main.input.keys.set(actionName, new InputKey({
-				keyCodes: [key]
-			}))
+			NarrowSDK.SetKeybind(actionName, [key]);
 		}
 
 		//NarrowSDK.Main.input.getKey("left");
@@ -1297,9 +1275,16 @@ window.addEventListener("load", function () {
 			//NarrowUI.drawText(`NarrowClient`, width - 250, 160, 16, "blue");
 		}
 
-		requestAnimationFrame(onFrame.bind(this));
+		//for (const e of NarrowSDK.Main.materials.allMaterials()) {
+		//	e.uniforms.colorMultiplier.value.set(new THREE.Color(1.4, 1.4, 1.4));
+		//	e.uniforms.colorAdder.value.set(new THREE.Color(0, 0, 0));
+		//	e.uniforms.saturation.value = 1;
+		//	e.uniforms.fogAmount.value = 0;
+		//	e.uniforms.fogHeightAmountMin.value = 0;
+		//	e.uniforms.fogHeightAmountMax.value = 0;
+		//}
 
-		//NarrowSDK.Main.renderer.renderer.shadowMap.render(NarrowSDK.Scene, NarrowSDK.Main.cam.cam, [light]);
+		requestAnimationFrame(onFrame.bind(this));
 
 		let localPlayer = GetLocalPlayer();
 
@@ -1333,6 +1318,7 @@ window.addEventListener("load", function () {
 				window.NarrowSDK.SetSky(window.NarrowSDK.SkyDomes.Night);
 				break;
 		}
+
 		window.NarrowSDK.Scene.traverse(function (obj) {
 			if (obj.name === "skydome") {
 				window.NarrowSDK.Scene.traverse(function (obj2) {
