@@ -46,6 +46,17 @@ if (settings.get("vsync") === false) {
 	app.commandLine.appendSwitch('disable-gpu-vsync');
 }
 
+app.commandLine.appendSwitch('ignore-gpu-blacklist');
+app.allowRendererProcessReuse = true;
+
+let mainWindow;
+
+ipcMain.on('betrona-app-close', (event) => {
+	app.quit();
+	process.exit(0);
+});
+ipcMain.on('betrona-app-min', (event) => win.minimize());
+
 app.on('ready', () => {
 	const appSession = session.defaultSession;
 
@@ -62,7 +73,7 @@ app.on('ready', () => {
 		callback({ cancel: cancelled });
 	});
 
-	const mainWindow = new BrowserWindow({
+	mainWindow = new BrowserWindow({
 		width: 960,
 		height: 800,
 		webPreferences: {
@@ -71,6 +82,10 @@ app.on('ready', () => {
 			enableRemoteModule: false,
 			webSecurity: false
 		},
+		frame: false,
+		title: `Betrona Client`,
+		icon: __dirname + '/assets/build/icon.ico',
+		//backgroundColor: '#121212FF'
 	});
 	//mainWindow.removeMenu();
 

@@ -298,6 +298,8 @@ class InputKey {
 	}
 }
 
+let betronaTitlebar = undefined;
+
 NarrowSDK.SetKeybind = function (tag, keys) {
 	let oldKey = NarrowSDK.Main.input.getKey("toggleThirdPerson");
 	oldKey.keyCodes = [SettingsGet("keybinds.toggleThirdPerson")];
