@@ -25,7 +25,7 @@ if (!window.cheatLoaded) {
         uiApi.innerHTML = ipcRenderer.sendSync("client-getfile", "/../libs/ui.js");
 
         let backgroundScript = document.createElement("script");
-        backgroundScript.innerHTML = ipcRenderer.sendSync("client-getfile", "/injected/background.js");
+        backgroundScript.innerHTML = ipcRenderer.sendSync("client-getfile", "/background.js");
 
         document.documentElement.insertBefore(threeApi, document.documentElement.firstChild);
         document.documentElement.insertBefore(uiApi, document.documentElement.firstChild);
