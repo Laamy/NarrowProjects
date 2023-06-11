@@ -32,58 +32,71 @@ if (!window.cheatLoaded) {
         document.documentElement.insertBefore(backgroundScript, document.documentElement.firstChild);
     }
 
-    //async function InjectTitlebar() {
-    //    const titlebarStyleSheet = document.createElement('style');
-    //    titlebarStyleSheet.innerHTML = `
-    //  #titlebar {
-    //    -webkit-app-region: drag;
-    //    height: 30px;
-    //    background-color: #333;
-    //    color: #fff;
-    //    padding: 5px;
-    //  }
+    async function InjectTitlebar() {
+        const titlebarStyleSheet = document.createElement('style');
+        titlebarStyleSheet.innerHTML = `
 
-    //  #close-btn,
-    //  #min-btn {
-    //    float: right;
-    //    margin-left: 5px;
-    //    cursor: pointer;
-    //  }
-    //  `;
+      .c-main-menu-promo-banner-container {
+	    top: 50px;
+	    right: 20px;
+	    position: absolute;
+	    width: 320px;
+	    height: 210px;
+	    filter: var(--default-drop-shadow);
+      }
 
-    //    const titlebar = document.createElement('div');
-    //    titlebar.id = 'titlebar';
-    //    titlebar.style.webkitAppRegion = 'drag';
-    //    titlebar.style.backgroundColor = '#333';
-    //    titlebar.style.color = '#fff';
-    //    titlebar.style.height = '30px';
-    //    titlebar.style.lineHeight = '30px';
-    //    titlebar.style.padding = '0 10px';
+      #titlebar {
+        -webkit-app-region: drag;
+        height: 30px;
+        background-color: #333;
+        color: #fff;
+        padding: 5px;
+      }
 
-    //    const titleText = document.createElement('span');
-    //    titleText.textContent = 'Betrona Client';
-    //    titlebar.appendChild(titleText);
+      #close-btn,
+      #min-btn {
+        float: right;
+        margin-left: 5px;
+        cursor: pointer;
+      }
+      `;
 
-    //    const closeButton = document.createElement('div');
-    //    closeButton.id = 'close-btn';
-    //    closeButton.textContent = 'X';
-    //    closeButton.addEventListener('click', function () {
-    //        console.log('close event');
-    //        ipcRenderer.sendSync('betrona-app-close');
-    //    });
-    //    titlebar.appendChild(closeButton);
+        const titlebar = document.createElement('div');
+        titlebar.id = 'titlebar';
+        titlebar.style.webkitAppRegion = 'drag';
+        titlebar.style.backgroundColor = '#333';
+        titlebar.style.color = '#fff';
+        titlebar.style.height = '30px';
+        titlebar.style.lineHeight = '30px';
+        titlebar.style.padding = '0 10px';
 
-    //    const minimizeButton = document.createElement('div');
-    //    minimizeButton.id = 'min-btn';
-    //    minimizeButton.textContent = '-';
-    //    minimizeButton.addEventListener('click', function () { ipcRenderer.sendSync('betrona-app-min'); });
-    //    titlebar.appendChild(minimizeButton);
+        const titleText = document.createElement('span');
+        titleText.textContent = 'Betrona Client';
+        titlebar.appendChild(titleText);
 
-    //    const mainMenuElement = document.getElementById('mainMenu');
+        const closeButton = document.createElement('div');
+        closeButton.id = 'close-btn';
+        closeButton.textContent = 'X';
+        closeButton.addEventListener('click', function () {
+            console.log('close event');
+            ipcRenderer.sendSync('betrona-app-close');
+        });
+        titlebar.appendChild(closeButton);
 
-    //    document.head.appendChild(titlebarStyleSheet);
-    //    mainMenuElement.appendChild(titlebar); // , mainMenuElement.firstChild
-    //}
+        const minimizeButton = document.createElement('div');
+        minimizeButton.id = 'min-btn';
+        minimizeButton.textContent = '-';
+        minimizeButton.addEventListener('click', function () { ipcRenderer.sendSync('betrona-app-min'); });
+        titlebar.appendChild(minimizeButton);
+
+        const mainMenuElement = document.getElementById('mainMenu');
+
+        document.head.appendChild(titlebarStyleSheet);
+        mainMenuElement.appendChild(titlebar); // , mainMenuElement.firstChild
+
+        const annoyingElement = document.getElementsByClassName("main-menu-promo-banner-container")[0];
+        annoyingElement.classList = "c-main-menu-promo-banner-container";
+    }
 
     let scriptObserver = new MutationObserver((mutations) => {
         for (const mutation of mutations) {
