@@ -68,16 +68,16 @@ app.on('ready', () => {
 		icon: __dirname + '/assets/build/icon.ico',
 		backgroundColor: '#121212FF'
 	});
-	//mainWindow.removeMenu();
+	mainWindow.removeMenu();
 
 	mainWindow.loadURL("https://narrow.one/");
 
-	//????
-	shortcuts.register(mainWindow, 'F11', () => {
-		mainWindow.setFullScreen(!mainWindow.isFullScreen());
-	});
+	shortcuts.register(mainWindow, 'F11', () => mainWindow.setFullScreen(!mainWindow.isFullScreen()));
+
+	shortcuts.register(mainWindow, 'F12', () => mainWindow.webContents.openDevTools());
 
 	shortcuts.register(mainWindow, 'F6', () => mainWindow.loadURL(clipboard.readText()));
+
 	shortcuts.register(mainWindow, 'F5', () => mainWindow.reload());
 });
 

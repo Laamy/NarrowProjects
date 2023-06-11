@@ -44,14 +44,55 @@
     <Content Include="src\assets\paper_wing.png" />
     <Content Include="src\assets\paper_wing.svg" />
     <Content Include="src\background.js" />
+    <Content Include="src\Hooks\LoadMapHook.js">
+      <SubType>Code</SubType>
+    </Content>
+    <Content Include="src\Hooks\MainInstanceHook.js">
+      <SubType>Code</SubType>
+    </Content>
+    <Content Include="src\Hooks\NetConnectHook.js">
+      <SubType>Code</SubType>
+    </Content>
+    <Content Include="src\Hooks\PokiHook.js">
+      <SubType>Code</SubType>
+    </Content>
+    <Content Include="src\Hooks\unused\RendererHook.js">
+      <SubType>Code</SubType>
+    </Content>
+    <Content Include="src\Hooks\SceneStackHook.js">
+      <SubType>Code</SubType>
+    </Content>
+    <Content Include="src\Hooks\unused\RecieveFromServerHook.js">
+      <SubType>Code</SubType>
+    </Content>
+    <Content Include="src\Hooks\unused\SetTImeoutHook.js">
+      <SubType>Code</SubType>
+    </Content>
     <Content Include="src\main.js" />
     <Content Include="src\preload.js" />
+    <Content Include="src\SDK\Classes\NarrowMapsAPI.js">
+      <SubType>Code</SubType>
+    </Content>
+    <Content Include="src\SDK\Utils.js">
+      <SubType>Code</SubType>
+    </Content>
+    <Content Include="src\SDK\Structure\NarrowMaps.js">
+      <SubType>Code</SubType>
+    </Content>
+    <Content Include="src\SDK\Structure\InputKey.js">
+      <SubType>Code</SubType>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="src\" />
     <Folder Include="libs\" />
     <Folder Include="src\assets\" />
     <Folder Include="src\assets\build\" />
+    <Folder Include="src\Hooks\" />
+    <Folder Include="src\Hooks\unused\" />
+    <Folder Include="src\SDK\" />
+    <Folder Include="src\SDK\Classes\" />
+    <Folder Include="src\SDK\Structure\" />
   </ItemGroup>
   <Import Project="$(VSToolsPath)\Node.js Tools\Microsoft.NodejsToolsV2.targets" />
   <ProjectExtensions>

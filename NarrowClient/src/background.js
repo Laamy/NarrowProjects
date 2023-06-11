@@ -1,588 +1,100 @@
-// DONT TOUCH
-window.environment = "dev"; // "dev", "dev-roaming", "release"
+// setup globals region
+{
+	window.environment = "dev"; // "dev", "dev-roaming", "release"
 
-window.selected = 0;
-window.renderDistance = 3; // default (900 far but i wont be using that)
-window.gameSaturation = "1";
-window.wireBow = true;
-window.clientName = "Betrona";
-window.removeTrails = false;
-window.customMainMenu = true;
-window.randomMainMenu = false;
+	window.selected = 0;
+	window.renderDistance = 3; // default (900 far but i wont be using that)
+	window.gameSaturation = "1";
+	window.wireBow = true;
+	window.clientName = "Betrona";
+	window.removeTrails = false;
+	window.customMainMenu = true;
+	window.randomMainMenu = false;
 
-window.adSkip = true; // set to false in public builds cuz I feel bad for making this in the first place lol..
+	window.adSkip = true;
 
-const SettingsGet = window.electronApi.SettingsGet;
-const SettingsSet = window.electronApi.SettingsSet;
+	// set to false in public builds cuz I feel bad for making this in the first place lol..
+	if (window.environment === "release") {
+		window.adSkip = false;
+	}
 
-// ported from my old cheat
-NarrowUI = {
-	canvas: null,
-	context: null,
-
-	init: function () {
-		var element = document.getElementsByClassName("mainCanvas")[0];
-
-		this.canvas = document.createElement("canvas");
-		this.canvas.style.display = "block";
-		this.canvas.style.position = "absolute";
-		this.canvas.style.top = "0";
-		this.canvas.style.left = "0";
-		this.canvas.style.zIndex = "1";
-
-		document.body.insertBefore(this.canvas, element);
-
-		this.context = this.canvas.getContext('2d');
-
-		this.context.antialias = true;
-
-		this.resizeCanvas();
-
-		window.addEventListener("resize", this.resizeCanvas.bind(this));
-	},
-
-	clearCanvas: function () {
-		this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-	},
-
-	resizeCanvas: function () {
-		this.canvas.width = window.innerWidth;
-		this.canvas.height = window.innerHeight;
-
-		this.clearCanvas();
-	},
-
-	drawText: function (text, x, y, fontSize, color) {
-		this.context.font = `${fontSize}px arial`; // arial my love!
-		this.context.fillStyle = color;
-		this.context.fillText(text, x, y);
-	},
-
-	fillRect: function (x, y, width, height, color) {
-		this.context.fillStyle = color;
-		this.context.fillRect(x, y, width, height);
-	},
-
-	pushNotification: function (title, reason) {
-		const dialogContainer = document.createElement('div');
-		dialogContainer.classList.add('dialog', 'wrinkledPaper');
-		dialogContainer.style.setProperty('--wrinkled-paper-seed', '63563');
-		dialogContainer.style.setProperty('z-index', '100');
-
-		const dialogTitle = document.createElement('h2');
-		dialogTitle.classList.add('dialogTitle', 'blueNight');
-		dialogTitle.textContent = 'Connection closed';
-		dialogContainer.appendChild(dialogTitle);
-
-		const dialogText = document.createElement('div');
-		dialogText.classList.add('dialogText');
-		dialogText.textContent = 'You have been kicked for being afk for too long';
-		dialogContainer.appendChild(dialogText);
-
-		const dialogButtonsContainer = document.createElement('div');
-		dialogButtonsContainer.classList.add('dialogButtonsContainer');
-
-		const dialogButton = document.createElement('button');
-		dialogButton.classList.add('dialog-button', 'blueNight', 'wrinkledPaper');
-		dialogButton.style.setProperty('--wrinkled-paper-seed', '21569');
-		dialogButton.innerHTML = '<span>ok</span>';
-		dialogButtonsContainer.appendChild(dialogButton);
-
-		dialogContainer.appendChild(dialogButtonsContainer);
-
-		document.body.append(dialogContainer);
-
-		this.drawShadow();
-	},
-
-	drawShadow: function () {
-		const dialogCurtain = document.createElement('div');
-		dialogCurtain.classList.add('dialogCurtain', 'fullScreen');
-		dialogCurtain.style.setProperty('z-index', '99');
-
-		document.body.append(dialogCurtain);
+	// electron api stuff
+	window.NarrowSDK.Electron = {};
+	window.NarrowSDK.Electron.SettingsGet = window.electronApi.SettingsGet;
+	window.NarrowSDK.Electron.SettingsSet = window.electronApi.SettingsSet;
+	window.NarrowSDK.Electron.Include = function (file) {
+		eval(window.electronApi.SendSync("client-getfile", "/" + file));
 	}
 }
 
-let betronaKeybinds = {
+const Include = window.NarrowSDK.Electron.Include;
+const SettingsGet = window.NarrowSDK.Electron.SettingsGet;
+const SettingsSet = window.NarrowSDK.Electron.SettingsSet;
+
+// hooks
+Include("Hooks/SceneStackHook.js");
+Include("Hooks/MainInstanceHook.js");
+Include("Hooks/PokiHook.js");
+Include("Hooks/LoadMapHook.js");
+Include("Hooks/NetConnectHook.js");
+
+// sdk stuff
+Include("SDK/Utils.js");
+
+// game classes
+Include("SDK/Structure/InputKey.js");
+Include("SDK/Structure/NarrowMaps.js");
+
+// classes
+Include("SDK/Classes/NarrowMapsAPI.js");
+
+// code starts here
+NarrowSDK.BetronaKeybinds = {
 	zoom: "KeyE"
 }
 
-let NarrowMaps = { // lazy
-	"mainMenuMapHash": "3bbbfa0118cd68ad1b46d2f493583344850ea7bf5702195737b381d1610d979b",
-	"maps": [
-		{
-			"name": "Castles",
-			"assetName": "narrowCastles",
-			"hash": "d5ebb87e8e7dfe661eac15880f85145b43ff6afa7f9620c86ebff6ae3851d052",
-			"configHash": "05f6888df37bfdef71bf1970e8253150f48f5fea726bcc98a28cbc20dadcb12f",
-			"size": 2057992
-		},
-		{
-			"name": "Forts",
-			"assetName": "narrowForts",
-			"hash": "aaa82e8d7528788bdb9eae05e0e986b81594ddf4b794ec0270a92c9a1367c9ce",
-			"configHash": "3bb3b9695c5edc741348c96b924fd9bb2fec2272591e6e02aee92b40a7abaabf",
-			"size": 1735656
-		},
-		{
-			"name": "Alleys",
-			"assetName": "narrowAlleys",
-			"hash": "6aef46b604384f7d896554023ff8b10f721815e0ca9490a9964372b85fa7635b",
-			"configHash": "30093f8525598318b052e99d780f34ebe2e041c00ee9bbb12c1fb4cc43e2af06",
-			"size": 2417552
-		},
-		{
-			"name": "Fields",
-			"assetName": "narrowFields",
-			"hash": "e86d9d3af827768d87f91c326a6cbbd4fcad53e04c09d51e0861941c9f33d329",
-			"configHash": "e07a3ccfcd7c1d64928532ba2247c397ce2e2ea9b38f3e0427cb125b3123e6b2",
-			"size": 2437520
-		},
-		{
-			"name": "Ruins",
-			"assetName": "narrowRuins",
-			"hash": "fdfef595d573d5ffb8ba5550dab3ccbeafbf514a6100535cda6d99e6e75d65a4",
-			"configHash": "84712353e290982b13fd9b5e37fb3f2a30644e85079fb571e64c7d82910f8244",
-			"size": 1522624
-		},
-		{
-			"name": "Arena",
-			"assetName": "narrowArena",
-			"hash": "48e4dcb78948209be9c3115ab423d11951bdbd1f97c204abceea3d950b1d4b2e",
-			"configHash": "e424f311788484278c6c2e274a72b07775239e6cd219a4c733c1af35e5c2ca8c",
-			"size": 1660360
-		},
-		{
-			"name": "Towers",
-			"assetName": "narrowTowers",
-			"hash": "fd12cd312cece28bba1964789724b444e2bf697efe1ac1abf90b327bc9849b39",
-			"configHash": "f000281da3b2798032037d38d1aa86091875997c66e5d4731e077244873f2139",
-			"size": 1726336
-		},
-		{
-			"name": "Arch",
-			"assetName": "narrowArch",
-			"hash": "5d6cf9429ea0190ef0f85293fa5dfe96cb6c6ba02103f27aa9030ce15da41584",
-			"configHash": "92bf45895c36e9674d3a53fdc868546d4f7989bd2227ea31cf3dbfbd655e394e",
-			"size": 3412008
-		},
-		{
-			"name": "Halls",
-			"assetName": "narrowHalls",
-			"hash": "9d09c418618d1236e0e18d8dfa737e7a9c11238df3748492bd27f2d87686d578",
-			"configHash": "74e1ae9ae8fd992174146531f9216eb25f08ca395d1c8d3a3cd3d0e6eef42dcf",
-			"size": 2925336
-		},
-		{
-			"name": "Tombs",
-			"assetName": "narrowTombs",
-			"hash": "36e46377f1ef3360ed2d3ae95c695928505810129721fc8757ec793affc0f9ac",
-			"configHash": "35217cb961b375fc5f765b910f470c9ee7afcae304978bc69ab22ab6f6cb4c8a",
-			"size": 1326976
-		},
-		{
-			"name": "Hills",
-			"assetName": "narrowHills",
-			"hash": "9dfd84a9b3aced7844920d3c049714b592699ed46792f38c07bac9e4b027fb25",
-			"configHash": "d9f49ff1c20795b55356fc41ba81c473fbeb3b009c6150545fb718990b906fea",
-			"size": 2681136
-		},
-		{
-			"name": "jungle",
-			"assetName": "narrowJungle",
-			"hash": "24bb95bb81c5da57900109cd0b6c6166557d71808da9efa9b112960568fea50e",
-			"configHash": "21d8350c8cc644137cae3a04dba0fff4c18de7c15004889ee4608f95a698784f",
-			"size": 1835608
-		},
-		{
-			"name": "wall",
-			"assetName": "narrowWall",
-			"hash": "80fa63e8d98f2e6a142af03d91200b08dcca481023ed1c8972aa7946be634322",
-			"configHash": "80f8d774013d1ba19dafaf2224667bd6f75261287c315b2915a7fe729922db21",
-			"size": 3323744
-		},
-		{
-			"name": "temple",
-			"assetName": "narrowTemple",
-			"hash": "5f5a253ce09547d77b1d4bae181b7f83942c975e6b3132a9c1aaa39adebd47e5",
-			"configHash": "07f830904efeb67e8f01f2e9bab3127ca3c7744d9e4fef6a0d243ab2af39afa7",
-			"size": 3832752
-		},
-		{
-			"name": "graveyard",
-			"assetName": "narrowGraveyard",
-			"hash": "bca0789b85e9746166bb7a60562785828a9480acd71dbbae9073db15c4beac37",
-			"configHash": "ec869347cab4e15da447c5bf0b804e2791a0851bc1baadd4abfedb61b6c569a6",
-			"size": 2154880
-		},
-		{
-			"name": "desert",
-			"assetName": "narrowDesert",
-			"hash": "3bbbfa0118cd68ad1b46d2f493583344850ea7bf5702195737b381d1610d979b",
-			"configHash": "f01470ea7de17cdd4a725471719eee453b157c968ae3ffd04c71d84a5f85abf9",
-			"size": 2733379,
-			"isNasset": true
-		}
-	],
-	"lastUpdatedTimestamp": 1685351479331
-};
-
-// bad idea cuz it moves them all to the main thread the nodejs electron app uses
-//let origSetTimeout = window.setTimeout;
-//window.setTimeout = function (callback, timeout) {
-//	console.log(timeout); // 1500
-//	origSetTimeout.call(this, callback, timeout);
-//}
-
-// had to be forked rip
-class InputKey {
-	constructor({
-		keyCodes: t = [],
-		mouseButtons: e = [],
-		gamepadButtons: i = []
-	} = {}) {
-		this.keyCodes = t,
-			this.mouseButtons = e,
-			this.gamepadButtons = i,
-			this.pressed = !1,
-			this.pressedGamepad = !1,
-			this.onPressedChangeCbs = new Set,
-			this.onPressedDownCbs = new Set,
-			this.onPressedUpCbs = new Set
-	}
-	setKeyCodePressed(t, e, i) {
-		let s = !1,
-			n = !1;
-		return this.keyCodes.includes(t) && (n = this.setKeyPressed(e, i), s = !0), {
-			needsPreventDefault: s,
-			preventOthers: n
-		}
-	}
-	setMouseButtonPressed(t, e, i) {
-		return !!this.mouseButtons.includes(t) && this.setKeyPressed(e, i)
-	}
-	setPressedGamepadButtons(t, e) {
-		let i = !1;
-		for (const e of this.gamepadButtons)
-			if (t.includes(e)) {
-				i = !0;
-				break
-			}
-		return this.pressedGamepad != i && (this.pressedGamepad = i, this.setKeyPressed(i, e))
-	}
-	setKeyPressed(t, e = !1) {
-		let i = !1;
-		if (t != this.pressed && (this.pressed = t, !e)) {
-			for (const e of this.onPressedChangeCbs) {
-				e(t) && (i = !0)
-			}
-			if (t)
-				for (const t of this.onPressedDownCbs) {
-					t() && (i = !0)
-				}
-			else
-				for (const t of this.onPressedUpCbs) {
-					t() && (i = !0)
-				}
-		}
-		return i
-	}
-	onPressedChange(t) {
-		this.onPressedChangeCbs.add(t)
-	}
-	onPressedDown(t) {
-		this.onPressedDownCbs.add(t)
-	}
-	onPressedUp(t) {
-		this.onPressedUpCbs.add(t)
-	}
-	removeCb(t) {
-		const e = t;
-		this.onPressedChangeCbs.delete(e),
-			this.onPressedDownCbs.delete(e),
-			this.onPressedUpCbs.delete(e)
-	}
-}
-
-let betronaTitlebar = undefined;
-
-NarrowSDK.SetKeybind = function (tag, keys) {
-	let oldKey = NarrowSDK.Main.input.getKey("toggleThirdPerson");
-	oldKey.keyCodes = [SettingsGet("keybinds.toggleThirdPerson")];
-}
-
-NarrowSDK.NarrowUI2D = NarrowUI; // debugging reasons but dont use this reference
-NarrowSDK.LoadNarrowMap = function (cfg) {
-	const SetupMap = t => {
-		let _this = NarrowSDK.Main.gameManager.activeGame;
-
-		if ("colliders" == t.type) {
-			_this.physics.removeMapColliders();
-			for (const e of t.colliders)
-				_this.physics.addMapCollider(e);
-			_this.physics.buildOctree(),
-				_this.receivedColliders = !0,
-				_this.updateGameIsVisible()
-		} else
-			"scene" == t.type && (_this.destructed ? MapLoader.disposeMapGeometries(t.scene) : _this.setMapScene(t.scene), _this.hingeManager.setHingeObjects(t.hinges))
-	};
-
-	NarrowSDK.Main.mapLoader.loadMap({
-		request: {
-			type: "config",
-			config: cfg
-		}
-	}, SetupMap);
-}
-
-const originalBind = Function.prototype.bind;
-Function.prototype.bind = function (thisRef, ...options) {
-	if (thisRef !== undefined && thisRef !== null) {
-		if (thisRef.input !== undefined) {
-			NarrowSDK.Main = thisRef;
-		}
-	}
-
-	return originalBind.call(this, thisRef, ...options);
-}
-
-/*
-
-NarrowSDK.HandScene = {
-	"FirstPersonObjContainer": {
-		"Bow asset loader": {
-			"Arrow point idle": {},
-			"Arrow point loaded": {},
-			"merged bow mesh": {},
-			"Arrow": {},
-		},
-		"melee asset loader": {
-			"melee": {}
-		}
-	}
-}
-
-*/
-
-function SetUITheme(value) {
-	switch (value) {
-		case "0":
-			document.documentElement.classList = "theme-dark";
-			break;
-		case "1":
-			document.documentElement.classList = "theme-light"; // not needed
-			break;
-		case "2":
-			document.documentElement.classList = "theme-amoled";
-			break;
-		case "3":
-			document.documentElement.classList = "theme-purple";
-			break;
-		case "4":
-			document.documentElement.classList = "theme-sapphire";
-			break;
-	}
-}
-
-function SetGameSaturation(amount) {
-	window.NarrowSDK.Scene.traverse(function (obj) { // can sokmetimes be undefined for some reason
-		if ((obj.name === "map_merged" || obj.name === " merged") && obj.material !== undefined) { // merged models tend to be the map
-			obj.material[0].uniforms.saturation = { value: amount }; // map
-
-			if (obj.material[1] !== undefined) {
-				obj.material[1].uniforms.saturation = { value: amount }; // extra map details like plants
-			}
-		}
-	});
-}
-
-function ForEachFirstPersonObjContainer(callback) {
-	for (scene of window.NarrowSDK.SceneStack) {
-		scene.traverse(function (obj2) {
-			if (obj2.name === "FirstPersonObjContainer") {
-				callback(obj2);
-				return;
-			}
-		});
-	}
-}
-
-function GetLocalPlayer() {
-	let player = undefined;
-
-	if (NarrowSDK.Main.gameManager.activeGame === null || NarrowSDK.Main.gameManager.activeGame.players === undefined) {
-		return undefined;
-	}
-
-	return NarrowSDK.Main.gameManager.activeGame.getMyPlayer();
-}
-
-function ShowAlert(msg, title, options) {
-	return NarrowSDK.Main.dialogManager.showAlert({
-		title: title,
-		text: msg,
-		buttons: options
-	});
-}
-
-let oldFov;
-
+// custom keybind events
 window.addEventListener("keydown", function (e) {
 	if (NarrowSDK.Main !== undefined) {
-		if (e.code === betronaKeybinds.zoom) {
+		if (e.code === NarrowSDK.BetronaKeybinds.zoom) {
 			window.NarrowSDK.Scene.traverse(function (obj) {
 				if (obj.name === "cam") {
 					obj.zoom = 8;
 				}
 			});
 
-			ForEachFirstPersonObjContainer(function (obj) {
+			NarrowSDK.Utils.ForEachFirstPersonObjContainer(function (obj) {
 				obj.visible = false;
 			});
 		}
 	}
 });
-
 window.addEventListener("keyup", function (e) {
 	if (NarrowSDK.Main !== undefined) {
-		if (e.code === betronaKeybinds.zoom) {
+		if (e.code === NarrowSDK.BetronaKeybinds.zoom) {
 			window.NarrowSDK.Scene.traverse(function (obj) {
 				if (obj.name === "cam") {
 					obj.zoom = 1;
 				}
 			});
 
-			ForEachFirstPersonObjContainer(function (obj) {
+			NarrowSDK.Utils.ForEachFirstPersonObjContainer(function (obj) {
 				obj.visible = true;
 			});
 		}
 	}
 });
 
-function showNotification(text) {
-	let _this = NarrowSDK.Main.gameManager.activeGame.scoreOffsetNotificationsUi;
-
-	let s = .5;
-
-	const n = document.createElement("div");
-	n.classList.add("scoreOffsetNotification"),
-		_this.listEl.appendChild(n),
-		_this.createdNotifications.unshift({
-			el: n,
-			destroyTime: Date.now() + 1e3 * s + 1e3
-		});
-
-	const a = document.createElement("div");
-	if (a.classList.add("scoreOffsetNotificationAnim"), a.style.animation = `1s notificationIconFade ${s}s both, 0.2s notificationIconPop`, n.appendChild(a)) {
-		const t = document.createTextNode(text);
-		a.appendChild(t);
-	}
-
-	_this.destroyOldNotifications();
-	_this.updateNotificationOffsets();
-}
-
-// ported from narrow.one client source
-let ReceiveAction = {
-	JOINED_GAME_ID: 0,
-	CREATE_PLAYER: 1,
-	DESTROY_PLAYER: 2,
-	PLAYER_OWNERSHIP: 3,
-	PLAYER_DATA: 4,
-	CREATE_ARROW: 5,
-	CHANGE_FLAG: 6,
-	SCOREBOARD: 7,
-	FLAG_POSITION: 8,
-	PING: 9,
-	PLAYER_PING_DATA: 10,
-	GAME_END: 11,
-	CLAIM_HIT_BY_ARROW: 12,
-	DISCONNECT_REASON: 13,
-	GAME_MAP_HASH: 14,
-	PLAYER_PERFORM_ACTION: 15,
-	PLAYER_NAME: 16,
-	PLAYER_SCORES: 17,
-	CHANGE_SELECTED_CLASS: 18,
-	GAME_START: 19,
-	SET_AUTOSHOOT_VALUE: 20,
-	EQUIPPED_SKIN_DATA: 21,
-	OFFSET_PLAYER_SCORE: 22,
-	GAME_END_ACCOUNT_STATS: 23,
-	GUEST_DATA_CHANGED: 24,
-	PLAYER_TEAM_ID: 25,
-	SAME_SQUAD_PLAYERS: 26,
-	SQUAD_ID_RESPONSE: 27,
-	SQUAD_JOIN_ERROR_RESPONSE: 28,
-	REQUEST_MAP_HASH: 29,
-	GAME_TIME: 30,
-	PLAYER_NAME_VERIFIED: 31,
-	GAME_SEED: 32,
-	SET_PLAYER_HEALTH: 33,
-	CHAT_MESSAGE: 34,
-	SPAWN: 35,
-	SAME_SQUAD_PLAYER_DATA: 36,
-	ACTIVE_WEAPON_TYPE: 37,
-	HIT_VALIDATION_DATA: 38,
-	MELEE_HIT_PLAYER: 39,
-	AVG_TEAM_ELO: 40,
-	ARROW_HIT_PLAYER: 41,
-	PLAYER_KILL_PLAYER: 42
-};
-
-function parseStringMessage(t, e = 4) {
-	if (t.byteLength < e + 4)
-		return null;
-	const i = new Uint32Array(t, e, 1)[0];
-	try {
-		const s = new Uint8Array(t, e + 4, i);
-		return (new TextDecoder).decode(s)
-	} catch (t) {
-		return null
-	}
-}
-
-//EventTarget.prototype.addEventListener = new Proxy(EventTarget.prototype.addEventListener, {
-//	apply(target, thisArgs, args) {
-//		if (args[0] == "message") {
-//			let origFunc = args[1];
-//			args[1] = function (...hookArgs) {
-//				if (hookArgs[0].currentTarget.url !== undefined) {
-//					if (hookArgs[0].currentTarget.url.includes("narrow.one/ws")) {
-//						let packetBuffer = hookArgs[0].data;
-
-//						i = new Float32Array(packetBuffer, 0, Math.floor(packetBuffer.byteLength / 4));
-//						s = new Uint32Array(packetBuffer, 0, Math.floor(packetBuffer.byteLength / 4));
-//						n = new Int32Array(packetBuffer, 0, Math.floor(packetBuffer.byteLength / 4));
-//						a = new Uint16Array(packetBuffer, 0, Math.floor(packetBuffer.byteLength / 2));
-
-//						if (s[0] == ReceiveAction.CHAT_MESSAGE) {
-//							let msg = parseStringMessage(packetBuffer);
-//							if (msg) {
-//								const packet = JSON.parse(msg);
-//								const n = NarrowSDK.Main.gameManager.activeGame.chat.game.players.get(packet.data.playerId);
-//								console.log(n.playerName + ": " + packet.data.message);
-//							}
-//						}
-//					}
-//				}
-//				origFunc.call(this, ...hookArgs);
-//			}
-//		}
-//		return Reflect.apply(...arguments);
-//	}
-//});
-
 window.addEventListener("load", function () {
+	if (window.NarrowSDK.Scene === undefined) {
+		console.log("Fatal error");
+		location.reload();
+	}
+
 	console.log(window.NarrowSDK);
 
-	NarrowSDK.Main.poki.commercialBreak = function () { }
-
-	if (window.adSkip) {
-		NarrowSDK.Main.poki.rewardedBreak = function () {
-			return { success: true };
-		}
-	}
+	// found in hooks/PokiHook.js
+	NarrowSDK.Poki.ReplaceMethods(window.adSkip);
 
 	if (SettingsGet('worldtime')) {
 		window.selected = SettingsGet('worldtime');
@@ -591,26 +103,26 @@ window.addEventListener("load", function () {
 		window.renderDistance = SettingsGet('renderdistance');
 	}
 	if (SettingsGet('theme')) {
-		SetUITheme(SettingsGet('theme'));
+		NarrowSDK.Utils.SetUITheme(SettingsGet('theme'));
 	}
 	if (SettingsGet('mapsaturation')) {
 		window.gameSaturation = SettingsGet('mapsaturation');
 	}
 
 	if (SettingsGet("keybinds.chat")) {
-		NarrowSDK.SetKeybind("chat", [SettingsGet("keybinds.chat")]);
+		NarrowSDK.Utils.SetKeybind("chat", [SettingsGet("keybinds.chat")]);
 	}
 	if (SettingsGet("keybinds.toggleWeapon")) {
-		NarrowSDK.SetKeybind("toggleWeapon", [SettingsGet("keybinds.toggleWeapon")]);
+		NarrowSDK.Utils.SetKeybind("toggleWeapon", [SettingsGet("keybinds.toggleWeapon")]);
 	}
 	if (SettingsGet("keybinds.playerList")) {
-		NarrowSDK.SetKeybind("playerList", [SettingsGet("keybinds.playerList")]);
+		NarrowSDK.Utils.SetKeybind("playerList", [SettingsGet("keybinds.playerList")]);
 	}
 	if (SettingsGet("keybinds.toggleThirdPerson")) {
-		NarrowSDK.SetKeybind("toggleThirdPerson", [SettingsGet("keybinds.toggleThirdPerson")]);
+		NarrowSDK.Utils.SetKeybind("toggleThirdPerson", [SettingsGet("keybinds.toggleThirdPerson")]);
 	}
 	if (SettingsGet("keybinds.zoomMod")) {
-		betronaKeybinds.zoom = SettingsGet("keybinds.zoomMod");
+		NarrowSDK.BetronaKeybinds.zoom = SettingsGet("keybinds.zoomMod");
 	}
 
 	if (SettingsGet("mainmenu.enabled") !== undefined) { // modified main menu settings stuff
@@ -620,79 +132,11 @@ window.addEventListener("load", function () {
 		window.randomMainMenu = SettingsGet("mainmenu.random");
 	}
 
-	if (window.NarrowSDK.Scene === undefined) {
-		console.log("Fatal error");
-		location.reload();
-	}
+	// found in hooks/LoadMapHook.js
+	window.NarrowSDK.LoadMap.InitializeHook();
 
-	let RendererProtoType = Object.getPrototypeOf(NarrowSDK.Main.renderer);
-	let reloadRenderer = RendererProtoType.reloadRenderer;
-	RendererProtoType.reloadRenderer = function () {
-		let _this = NarrowSDK.Main.renderer;
-
-		_this.canvas && (_this.canvas.remove(), _this.canvas = null);
-		_this.renderer = null;
-
-		const t = NarrowSDK.Main.settingsManager.getValue("antialias");
-
-		try {
-			_this.renderer = new ObfThreeApi.WebGLRenderer({
-				antialias: t,
-				powerPreference: "high-performance",
-				alpha: true
-			});
-		} catch (e) {
-			console.error("Failed to create WebGLRenderer:", t);
-			_this.webglCreationFailed = true;
-			NarrowSDK.Main.mainInfoTextManager.updateText();
-		}
-
-		_this.renderer && (_this.renderer.outputEncoding = ObfThreeApi.sRGBEncoding, _this.renderer.autoClear = !1, _this.canvas = _this.renderer.domElement, _this.canvas.classList.add("fullScreen", "mainCanvas"), _this.canvas.inert = !0, document.body.appendChild(_this.canvas)),
-			_this.updateSmoothFiltering(),
-			_this.onResize()
-	}
-
-	NarrowSDK.Main.renderer.reloadRenderer();
-
-	NarrowSDK.Main.mainMenu.makeMainMenuVisibleFromUserGesture();
-	let OfflineRoamingProtoType = Object.getPrototypeOf(NarrowSDK.Main.gameManager.activeGame);
-	let origOfflineRoamingLoadMap = OfflineRoamingProtoType.loadMap;
-	OfflineRoamingProtoType.loadMap = function () {
-		NarrowSDK.Main.mainMenu.makeMainMenuVisibleFromUserGesture(); // gonna keep this as default
-
-		// load different map
-		if (window.customMainMenu) {
-			if (window.randomMainMenu) {
-				NarrowSDK.LoadNarrowMap(NarrowMaps.maps[Math.floor(Math.random() * 16)]);
-			}
-			else {
-				NarrowSDK.LoadNarrowMap(NarrowMaps.maps[8]); // castles (0-15)
-			}
-		}
-	}
-
-	NarrowSDK.Main.gameManager.activeGame.loadMap();
-
-	let NetworkManagerPrototype = Object.getPrototypeOf(NarrowSDK.Main.network)
-
-	let origConnect = NetworkManagerPrototype.connect;
-	NetworkManagerPrototype.connect = function (...options) {
-		if (window.environment == "dev-roaming") {
-			return;
-		}
-
-		origConnect.call(this, ...options);
-	}
-
-	//let origLoadMap = NarrowSDK.Main.mapLoader.loadMap;
-	//NarrowSDK.Main.mapLoader.loadMap = function (t, e) {
-	//	//let origMapSetup = e;
-	//	//e = function (arg) {
-	//	//	console.log(arg);
-	//	//}
-
-	//	origLoadMap.call(this, t, e);
-	//}
+	// found in hooks/NetConnectHook.js
+	window.NarrowSDK.Network.InitializeHook();
 
 	let settingsBtn = undefined;
 
@@ -1103,7 +547,7 @@ window.addEventListener("load", function () {
 			selectElement.addEventListener("change", function (event) {
 				SettingsSet("theme", event.target.value);
 
-				SetUITheme(event.target.value);
+				NarrowSDK.Utils.SetUITheme(event.target.value);
 			});
 		}
 
@@ -1136,7 +580,7 @@ window.addEventListener("load", function () {
 			inputCheckbox.addEventListener("change", function (event) {
 				SettingsSet("adblock", event.target.checked);
 
-				ShowAlert("This setting requires a restart of " + window.clientName, window.clientName, [{ text: "Okay" }]);
+				NarrowSDK.Utils.ShowAlert("This setting requires a restart of " + window.clientName, window.clientName, [{ text: "Okay" }]);
 			});
 
 			settingsItemDiv.appendChild(settingsItemTextDiv);
@@ -1161,7 +605,7 @@ window.addEventListener("load", function () {
 			inputCheckbox.addEventListener("change", function (event) {
 				SettingsSet("vsync", event.target.checked);
 
-				ShowAlert("This setting requires a restart of " + window.clientName, window.clientName, [{ text: "Okay" }]);
+				NarrowSDK.Utils.ShowAlert("This setting requires a restart of " + window.clientName, window.clientName, [{ text: "Okay" }]);
 			});
 
 			settingsItemDiv.appendChild(settingsItemTextDiv);
@@ -1188,7 +632,6 @@ window.addEventListener("load", function () {
 
 		document.body.appendChild(dialogDiv);
 	}
-
 	function KbsCallback(div) {
 		const dialogDiv = document.createElement("div");
 		dialogDiv.className = "dialog wrinkledPaper";
@@ -1216,7 +659,7 @@ window.addEventListener("load", function () {
 
 			SettingsSet("keybinds." + actionName, key);
 
-			NarrowSDK.SetKeybind(actionName, [key]);
+			NarrowSDK.Utils.SetKeybind(actionName, [key]);
 		}
 
 		//NarrowSDK.Main.input.getKey("left");
@@ -1236,12 +679,12 @@ window.addEventListener("load", function () {
 			keybindsListDiv.appendChild(settingsGroupHeader);
 		}
 
-		createKeybindItem("Zoom", "zoomMod", betronaKeybinds.zoom, function (actionName, key) {
+		createKeybindItem("Zoom", "zoomMod", NarrowSDK.BetronaKeybinds.zoom, function (actionName, key) {
 			console.log(`Keybind for ${actionName} changed to ${key}`);
 
 			SettingsSet("keybinds." + actionName, key);
 
-			betronaKeybinds.zoom = key;
+			NarrowSDK.BetronaKeybinds.zoom = key;
 		});
 		
 		function createKeybindItem(label, keyName, defaultKey, onClick) {
@@ -1292,36 +735,43 @@ window.addEventListener("load", function () {
 		document.body.appendChild(dialogDiv);
 	}
 
-	const geometry = new THREE.BoxGeometry(1, 1, 1);
-	const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-	const cube = new THREE.Mesh(geometry, material);
-	cube.position.x = -109;
-	cube.position.z = 114;
-	cube.name = "WayPoint";
-	window.NarrowSDK.Scene.add(cube);
+	// easter egg waypoint temp region
+	{
+		const geometry = new THREE.BoxGeometry(1, 1, 1);
+		const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+		const cube = new THREE.Mesh(geometry, material);
+		cube.position.x = -109;
+		cube.position.z = 114;
+		cube.name = "WayPoint";
+		window.NarrowSDK.Scene.add(cube);
+	}
 
-	window.NarrowSDK.Scene.autoUpdate = true;
-
-	const texture = new THREE.TextureLoader().load(window.electronApi.dirname + '/assets/default_wing.png'); 
-	texture.transparent = true;
-	texture.alphaTest = 0.5;
-
-	const wingGeometry = new THREE.BoxGeometry(0, 0.3, 0.4);
-	const wingMaterial = new THREE.MeshBasicMaterial({
-		map: texture,
-		transparent: true
-	});
-
-	const leftWing = new THREE.Mesh(wingGeometry, wingMaterial);
-	leftWing.position.x = 0.2;
-	leftWing.rotation.y = -10;
-
-	const rightWing = new THREE.Mesh(wingGeometry, wingMaterial);
-	rightWing.position.x = -0.2;
-	rightWing.rotation.y = 10;
+	window.NarrowSDK.Scene.autoUpdate = true; // this is the reason bows break.. got it..
 
 	const wingsGroup = new THREE.Group();
-	wingsGroup.add(leftWing, rightWing);
+
+	// temp wings region
+	{
+		const texture = new THREE.TextureLoader().load(window.electronApi.dirname + '/assets/default_wing.png');
+		texture.transparent = true;
+		texture.alphaTest = 0.5;
+
+		const wingGeometry = new THREE.BoxGeometry(0, 0.3, 0.4);
+		const wingMaterial = new THREE.MeshBasicMaterial({
+			map: texture,
+			transparent: true
+		});
+
+		const leftWing = new THREE.Mesh(wingGeometry, wingMaterial);
+		leftWing.position.x = 0.2;
+		leftWing.rotation.y = -10;
+
+		const rightWing = new THREE.Mesh(wingGeometry, wingMaterial);
+		rightWing.position.x = -0.2;
+		rightWing.rotation.y = 10;
+
+		wingsGroup.add(leftWing, rightWing);
+	}
 
 	let firstPersonHandMaterial = undefined;
 
@@ -1343,19 +793,6 @@ window.addEventListener("load", function () {
 	console.log(NarrowSDK.Main.gameManager.activeGame.Prototype);
 
 	function onFrame() {
-		if (NarrowUI.context === null) {
-			NarrowUI.init();
-		}
-
-		//if (window.NarrowSDK.Scene !== undefined) {
-		//	// draw essentials here
-		//	let width = NarrowUI.canvas.width;
-		//	let height = NarrowUI.canvas.height;
-
-		//	NarrowUI.clearCanvas(); // clear last frame drawings
-		//	//NarrowUI.drawText(`NarrowClient`, width - 250, 160, 16, "blue");
-		//}
-
 		//for (const e of NarrowSDK.Main.materials.allMaterials()) {
 		//	e.uniforms.colorMultiplier.value.set(new THREE.Color(1.4, 1.4, 1.4));
 		//	e.uniforms.colorAdder.value.set(new THREE.Color(0, 0, 0));
@@ -1367,7 +804,7 @@ window.addEventListener("load", function () {
 
 		requestAnimationFrame(onFrame.bind(this));
 
-		let localPlayer = GetLocalPlayer();
+		let localPlayer = NarrowSDK.Utils.GetLocalPlayer();
 
 		if (localPlayer !== undefined && localPlayer !== null) { // dont play around with crosshair class
 			//NarrowSDK.Main.gameManager.activeGame.crosshair.smoothAccuracy = -90;
@@ -1443,13 +880,13 @@ window.addEventListener("load", function () {
 
 		switch (window.gameSaturation) {
 			case "0":
-				SetGameSaturation(1)
+				NarrowSDK.Utils.SetGameSaturation(1)
 				break;
 			case "1":
-				SetGameSaturation(1.2)
+				NarrowSDK.Utils.SetGameSaturation(1.2)
 				break;
 			case "2":
-				SetGameSaturation(1.5)
+				NarrowSDK.Utils.SetGameSaturation(1.5)
 				break;
 		}
 
@@ -1462,7 +899,7 @@ window.addEventListener("load", function () {
 			firstPersonHandMaterial.wireframe = window.wireBow;
 		}
 
-		ForEachFirstPersonObjContainer(function (firstPersonObjContainer) {
+		NarrowSDK.Utils.ForEachFirstPersonObjContainer(function (firstPersonObjContainer) {
 			try {
 				if (firstPersonObjContainer !== undefined) {
 					if (firstPersonObjContainer.children[0].name == "melee asset loader") {

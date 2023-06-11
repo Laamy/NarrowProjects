@@ -6,11 +6,16 @@ const store = new Store();
 function SettingsSet(key, value) { store.set(key, value); }
 function SettingsGet(key) { return store.get(key); }
 
+function SendSync(sync, args) { // access to ipc sendsync functions functions
+    return ipcRenderer.sendSync(sync, args);
+}
+
 let dirname = ipcRenderer.sendSync("client-dirname");
 
 contextBridge.exposeInMainWorld("electronApi", {
     SettingsSet,
     SettingsGet,
+    SendSync,
     dirname
 });
 

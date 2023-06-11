@@ -84,25 +84,3 @@ window.NarrowSDK = {
 		}
 	}
 };
-
-window.NarrowSDK.SceneStack = [];
-
-WeakMap.prototype.set = new Proxy(WeakMap.prototype.set, {
-	apply(target, thisArgs, args) {
-		if (args[0].type == "Scene") {
-			if (window.NarrowSDK.Scene == undefined) {
-				window.NarrowSDK.Scene = args[0];
-			}
-
-			for (item of window.NarrowSDK.SceneStack) {
-				if (item.uuid === args[0].uuid) {
-					return Reflect.apply(...arguments);
-				}
-			}
-
-			window.NarrowSDK.SceneStack.push(args[0]);
-		}
-
-		return Reflect.apply(...arguments);
-	}
-});
