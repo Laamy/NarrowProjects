@@ -19,13 +19,13 @@ if (!window.cheatLoaded) {
 
     async function InjectProps() {
         let threeApi = document.createElement("script");
-        threeApi.innerHTML = ipcRenderer.sendSync("client-getthree");
+        threeApi.innerHTML = ipcRenderer.sendSync("client-getfile", "/../libs/three.js");
 
         let uiApi = document.createElement("script");
-        uiApi.innerHTML = ipcRenderer.sendSync("client-getui");
+        uiApi.innerHTML = ipcRenderer.sendSync("client-getfile", "/../libs/ui.js");
 
         let backgroundScript = document.createElement("script");
-        backgroundScript.innerHTML = ipcRenderer.sendSync("client-getbackground");
+        backgroundScript.innerHTML = ipcRenderer.sendSync("client-getfile", "/injected/background.js");
 
         document.documentElement.insertBefore(threeApi, document.documentElement.firstChild);
         document.documentElement.insertBefore(uiApi, document.documentElement.firstChild);

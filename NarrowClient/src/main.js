@@ -6,40 +6,27 @@ const path = require('path');
 
 const settings = new Store();
 
-ipcMain.on('client-getbackground', (event) => {
-	fs.readFile(__dirname + '/injected/background.js', 'utf8', (err, data) => {
-		if (err) {
-			console.error(err);
-			return;
-		}
-
-		event.returnValue = data
-	});
-});
-
+// script stuff
 ipcMain.on('client-dirname', (event) => event.returnValue = __dirname);
 
-ipcMain.on('client-getthree', (event) => {
-	fs.readFile(__dirname + '/../libs/three.js', 'utf8', (err, data) => {
+ipcMain.on('client-getfile', (event, filePath) => {
+	fs.readFile(__dirname + filePath, 'utf8', (err, data) => {
 		if (err) {
 			console.error(err);
 			return;
 		}
 
-		event.returnValue = data
+		event.returnValue = data;
 	});
 });
 
-ipcMain.on('client-getui', (event) => {
-	fs.readFile(__dirname + '/../libs/ui.js', 'utf8', (err, data) => {
-		if (err) {
-			console.error(err);
-			return;
-		}
-
-		event.returnValue = data
-	});
+// titlebar stuff
+ipcMain.on('betrona-app-close', (event) => {
+	app.quit();
+	process.exit(0);
 });
+
+ipcMain.on('betrona-app-min', (event) => win.minimize());
 
 if (settings.get("vsync") === false) {
 	app.commandLine.appendSwitch('disable-frame-rate-limit');
@@ -50,12 +37,6 @@ app.commandLine.appendSwitch('ignore-gpu-blacklist');
 app.allowRendererProcessReuse = true;
 
 let mainWindow;
-
-ipcMain.on('betrona-app-close', (event) => {
-	app.quit();
-	process.exit(0);
-});
-ipcMain.on('betrona-app-min', (event) => win.minimize());
 
 app.on('ready', () => {
 	const appSession = session.defaultSession;
