@@ -85,7 +85,7 @@ app.on('ready', () => {
 		//frame: false,
 		title: `Betrona Client`,
 		icon: __dirname + '/assets/build/icon.ico',
-		//backgroundColor: '#121212FF'
+		backgroundColor: '#121212FF'
 	});
 	//mainWindow.removeMenu();
 
