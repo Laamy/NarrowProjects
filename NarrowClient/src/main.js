@@ -82,7 +82,7 @@ app.on('ready', () => {
 			enableRemoteModule: false,
 			webSecurity: false
 		},
-		frame: false,
+		//frame: false,
 		title: `Betrona Client`,
 		icon: __dirname + '/assets/build/icon.ico',
 		//backgroundColor: '#121212FF'
