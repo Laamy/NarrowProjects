@@ -93,7 +93,7 @@ window.addEventListener("load", function () {
 
 	console.log(window.NarrowSDK);
 
-	// found in hooks/PokiHook.js
+	// found in Hooks/PokiHook.js
 	NarrowSDK.Poki.ReplaceMethods(window.adSkip);
 
 	if (SettingsGet('worldtime')) {
@@ -132,10 +132,10 @@ window.addEventListener("load", function () {
 		window.randomMainMenu = SettingsGet("mainmenu.random");
 	}
 
-	// found in hooks/LoadMapHook.js
+	// found in Hooks/LoadMapHook.js
 	window.NarrowSDK.LoadMap.InitializeHook();
 
-	// found in hooks/NetConnectHook.js
+	// found in Hooks/NetConnectHook.js
 	window.NarrowSDK.Network.InitializeHook();
 
 	let settingsBtn = undefined;
@@ -744,9 +744,12 @@ window.addEventListener("load", function () {
 		cube.position.z = 114;
 		cube.name = "WayPoint";
 		window.NarrowSDK.Scene.add(cube);
+
+		cube.updateMatrix();
+		cube.updateWorldMatrix(false, true);
 	}
 
-	window.NarrowSDK.Scene.autoUpdate = true; // this is the reason bows break.. got it..
+	//window.NarrowSDK.Scene.autoUpdate = true; // this is the reason bows break.. got it..
 
 	const wingsGroup = new THREE.Group();
 
@@ -817,6 +820,9 @@ window.addEventListener("load", function () {
 				const groupPosition = meshWorldPosition.add(offsetPosition);
 				wingsGroup.position.copy(groupPosition);
 				wingsGroup.rotation.copy(player.rotation);
+
+				wingsGroup.updateMatrix();
+				wingsGroup.updateWorldMatrix(false, true);
 
 				wingsGroup.visible = player.visible; // third person only
 			}

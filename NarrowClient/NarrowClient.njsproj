@@ -56,16 +56,16 @@
     <Content Include="src\Hooks\PokiHook.js">
       <SubType>Code</SubType>
     </Content>
-    <Content Include="src\Hooks\unused\RendererHook.js">
+    <Content Include="src\Hooks\Unused\RendererHook.js">
       <SubType>Code</SubType>
     </Content>
     <Content Include="src\Hooks\SceneStackHook.js">
       <SubType>Code</SubType>
     </Content>
-    <Content Include="src\Hooks\unused\RecieveFromServerHook.js">
+    <Content Include="src\Hooks\Unused\RecieveFromServerHook.js">
       <SubType>Code</SubType>
     </Content>
-    <Content Include="src\Hooks\unused\SetTImeoutHook.js">
+    <Content Include="src\Hooks\Unused\SetTImeoutHook.js">
       <SubType>Code</SubType>
     </Content>
     <Content Include="src\main.js" />
@@ -89,7 +89,7 @@
     <Folder Include="src\assets\" />
     <Folder Include="src\assets\build\" />
     <Folder Include="src\Hooks\" />
-    <Folder Include="src\Hooks\unused\" />
+    <Folder Include="src\Hooks\Unused\" />
     <Folder Include="src\SDK\" />
     <Folder Include="src\SDK\Classes\" />
     <Folder Include="src\SDK\Structure\" />
