@@ -36,10 +36,13 @@
     <Content Include="libs\ui.js" />
     <Content Include="package.json" />
     <Content Include="README.md" />
+    <Content Include="src\assets\build\icon.icns" />
+    <Content Include="src\assets\build\icon.ico" />
+    <Content Include="src\assets\build\icon.png" />
     <Content Include="src\assets\default_wing.png" />
-    <Content Include="src\assets\icon.ico" />
-    <Content Include="src\assets\icon.png" />
+    <Content Include="src\assets\default_wing.svg" />
     <Content Include="src\assets\paper_wing.png" />
+    <Content Include="src\assets\paper_wing.svg" />
     <Content Include="src\background.js" />
     <Content Include="src\main.js" />
     <Content Include="src\preload.js" />
@@ -48,6 +51,7 @@
     <Folder Include="src\" />
     <Folder Include="libs\" />
     <Folder Include="src\assets\" />
+    <Folder Include="src\assets\build\" />
   </ItemGroup>
   <Import Project="$(VSToolsPath)\Node.js Tools\Microsoft.NodejsToolsV2.targets" />
   <ProjectExtensions>
