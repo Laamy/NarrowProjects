@@ -793,8 +793,6 @@ window.addEventListener("load", function () {
 
 	const offset = new THREE.Vector3(0, 1.3, -0.2);
 
-	console.log(NarrowSDK.Main.gameManager.activeGame.Prototype);
-
 	function onFrame() {
 		//for (const e of NarrowSDK.Main.materials.allMaterials()) {
 		//	e.uniforms.colorMultiplier.value.set(new THREE.Color(1.4, 1.4, 1.4));
