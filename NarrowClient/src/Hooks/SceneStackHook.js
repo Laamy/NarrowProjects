@@ -10,15 +10,18 @@ WeakMap.prototype.set = new Proxy(WeakMap.prototype.set, {
 		// check if the first argument is an object of type "Scene"
 		if (args[0].type == "Scene") {
 			if (window.NarrowSDK.Scene == undefined) {
+				// store scene if scene isn't defined yet
 				window.NarrowSDK.Scene = args[0];
 			}
 
 			// scenes are called with weakmap.set two times so we need to check to
 			// see if the scene already exists in our scenestack or not
 			for (item of window.NarrowSDK.SceneStack) {
+
 				// if its found in the scenestack then we call the original and
 				// discard the rest of the code we run per scene
 				if (item.uuid === args[0].uuid) {
+
 					// call the oiginal function and pass in same arguments
 					return Reflect.apply(...arguments);
 				}

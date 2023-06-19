@@ -4,7 +4,7 @@ NarrowSDK.Poki = {
 	ReplaceMethods: function (SkipAds) {
 		// disable the commercial break ads when you go to the next round by replacing it with an empty function
 		NarrowSDK.Main.poki.commercialBreak = function () { }
-		console.log("[poki.commercialBreak, CommercialBreakHook] Successfully enabled");
+		console.log("[PokiSDK.prototype.commercialBreak, CommercialBreakHook] Successfully enabled");
 
 		// check if first argument is true and if so we replace the reward breaks with a modified function
 		// that automatically "skips" the ad while keeping the reward intact
@@ -12,7 +12,9 @@ NarrowSDK.Poki = {
 			NarrowSDK.Main.poki.rewardedBreak = function () {
 				return { success: true };
 			}
-			console.log("[poki.rewardedBreak, RewardedBreakHook] Successfully enabled");
+
+			// log hook event to console
+			console.log("[PokiSDK.prototype.rewardedBreak, RewardedBreakHook] Successfully enabled");
 		}
     }
 };

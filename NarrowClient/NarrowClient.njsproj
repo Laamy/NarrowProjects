@@ -56,6 +56,7 @@
     <Content Include="src\Hooks\PokiHook.js">
       <SubType>Code</SubType>
     </Content>
+    <Content Include="src\Hooks\SquadChatHook.js" />
     <Content Include="src\Hooks\Unused\RendererHook.js">
       <SubType>Code</SubType>
     </Content>

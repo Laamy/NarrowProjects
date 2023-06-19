@@ -37,6 +37,7 @@ Include("Hooks/MainInstanceHook.js");
 Include("Hooks/PokiHook.js");
 Include("Hooks/LoadMapHook.js");
 Include("Hooks/NetConnectHook.js");
+Include("Hooks/SquadChatHook.js");
 
 // sdk stuff
 Include("SDK/Utils.js");
@@ -137,6 +138,9 @@ window.addEventListener("load", function () {
 
 	// found in Hooks/NetConnectHook.js
 	window.NarrowSDK.Network.InitializeHook();
+
+	// found in Hooks/SquadChatHook.js
+	window.NarrowSDK.SquadNetwork.ReplaceMethods();
 
 	let settingsBtn = undefined;
 
@@ -765,6 +769,10 @@ window.addEventListener("load", function () {
 			transparent: true
 		});
 
+		const leftWing2 = new THREE.Mesh(wingGeometry, wingMaterial);
+		leftWing2.position.x = 0.21;
+		leftWing2.rotation.y = -10;
+
 		const leftWing = new THREE.Mesh(wingGeometry, wingMaterial);
 		leftWing.position.x = 0.2;
 		leftWing.rotation.y = -10;
@@ -773,7 +781,11 @@ window.addEventListener("load", function () {
 		rightWing.position.x = -0.2;
 		rightWing.rotation.y = 10;
 
-		wingsGroup.add(leftWing, rightWing);
+		const rightWing2 = new THREE.Mesh(wingGeometry, wingMaterial);
+		rightWing2.position.x = -0.21;
+		rightWing2.rotation.y = 10;
+
+		wingsGroup.add(leftWing, leftWing2, rightWing, rightWing2);
 	}
 
 	let firstPersonHandMaterial = undefined;
