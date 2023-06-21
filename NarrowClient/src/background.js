@@ -38,6 +38,29 @@ Include("Hooks/PokiHook.js");
 Include("Hooks/LoadMapHook.js");
 Include("Hooks/NetConnectHook.js");
 Include("Hooks/SquadChatHook.js");
+Include("Hooks/RecieveFromServerHook.js");
+
+/*
+
+i put text hooks here at first
+
+*/
+
+function randFromArray(t) {
+	return randFromArrayHelper(t, Math.random())
+}
+function randFromArrayHelper(t, e) {
+	return t[Math.floor(e * t.length)]
+}
+
+function InitTests() {
+	NarrowSDK.Main.skins.skinPresets.forEach(function (present) {
+		present.hairColorMultiplier = [0.17, 0.2, 0.18];
+		present.eyebrowColorMultiplier = [0.17, 0.2, 0.18];
+		present.beardColorMultiplier = [0.17, 0.2, 0.18];
+	});
+	NarrowSDK.Main.skins.savePresets();
+}
 
 // sdk stuff
 Include("SDK/Utils.js");
@@ -91,6 +114,8 @@ window.addEventListener("load", function () {
 		console.log("Fatal error");
 		location.reload();
 	}
+
+	InitTests();
 
 	console.log(window.NarrowSDK);
 

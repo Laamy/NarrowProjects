@@ -63,7 +63,7 @@
     <Content Include="src\Hooks\SceneStackHook.js">
       <SubType>Code</SubType>
     </Content>
-    <Content Include="src\Hooks\Unused\RecieveFromServerHook.js">
+    <Content Include="src\Hooks\RecieveFromServerHook.js">
       <SubType>Code</SubType>
     </Content>
     <Content Include="src\Hooks\Unused\SetTImeoutHook.js">
