@@ -39,6 +39,7 @@ Include("Hooks/LoadMapHook.js");
 Include("Hooks/NetConnectHook.js");
 Include("Hooks/SquadChatHook.js");
 Include("Hooks/RecieveFromServerHook.js");
+//Include("Hooks/SkillLevelHook.js");
 
 /*
 
@@ -72,7 +73,7 @@ window.addEventListener("keydown", function (e) {
 
 		if (e.code === NarrowSDK.BetronaKeybinds.zoom) {
 			window.NarrowSDK.Scene.traverse(function (obj) {
-				if (obj.name === "cam") {
+				if (obj.name === "cam" && !["INPUT", "SELECT", "BUTTON"].includes(document.activeElement.tagName)) {
 					obj.zoom = 8;
 				}
 			});
@@ -91,7 +92,7 @@ window.addEventListener("keyup", function (e) {
 
 		if (e.code === NarrowSDK.BetronaKeybinds.zoom) {
 			window.NarrowSDK.Scene.traverse(function (obj) {
-				if (obj.name === "cam") {
+				if (obj.name === "cam" && !["INPUT", "SELECT", "BUTTON"].includes(document.activeElement.tagName)) {
 					obj.zoom = 1;
 				}
 			});
