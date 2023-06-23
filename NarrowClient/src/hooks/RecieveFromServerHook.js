@@ -46,6 +46,10 @@ let ReceiveAction = {
 	PLAYER_KILL_PLAYER: 42
 };
 
+function SendChatAsBot(msg) {
+	NarrowSDK.Main.network.sendChatMessage("* " + msg);
+}
+
 EventTarget.prototype.addEventListener = new Proxy(EventTarget.prototype.addEventListener, {
 	apply(target, thisArgs, args) {
 		if (args[0] == "message") {
@@ -67,9 +71,7 @@ EventTarget.prototype.addEventListener = new Proxy(EventTarget.prototype.addEven
 								const n = NarrowSDK.Main.gameManager.activeGame.chat.game.players.get(packet.data.playerId);
 								console.log(n.playerName + ": " + packet.data.message);
 
-								//if (n.playerName !== "YeemiRouth") {
-								//	NarrowSDK.Main.network.sendChatMessage(n.playerName + ": " + packet.data.message);
-								//}
+								
 							}
 						}
 					}

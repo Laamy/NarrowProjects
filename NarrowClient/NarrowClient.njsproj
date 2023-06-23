@@ -41,6 +41,10 @@
     <Content Include="src\assets\build\icon.png" />
     <Content Include="src\assets\default_wing.png" />
     <Content Include="src\assets\default_wing.svg" />
+    <Content Include="src\assets\override\BlueNight.woff2" />
+    <Content Include="src\assets\override\NarrowOneBetterLogo.svg" />
+    <Content Include="src\assets\override\NarrowOneLogo.png" />
+    <Content Include="src\assets\override\NarrowOneLogo.svg" />
     <Content Include="src\assets\paper_wing.png" />
     <Content Include="src\assets\paper_wing.svg" />
     <Content Include="src\background.js" />
@@ -89,6 +93,7 @@
     <Folder Include="libs\" />
     <Folder Include="src\assets\" />
     <Folder Include="src\assets\build\" />
+    <Folder Include="src\assets\override\" />
     <Folder Include="src\Hooks\" />
     <Folder Include="src\Hooks\Unused\" />
     <Folder Include="src\SDK\" />

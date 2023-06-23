@@ -42,25 +42,9 @@ Include("Hooks/RecieveFromServerHook.js");
 
 /*
 
-i put text hooks here at first
+i put test hooks here at first
 
 */
-
-function randFromArray(t) {
-	return randFromArrayHelper(t, Math.random())
-}
-function randFromArrayHelper(t, e) {
-	return t[Math.floor(e * t.length)]
-}
-
-function InitTests() {
-	NarrowSDK.Main.skins.skinPresets.forEach(function (present) {
-		present.hairColorMultiplier = [0.17, 0.2, 0.18];
-		present.eyebrowColorMultiplier = [0.17, 0.2, 0.18];
-		present.beardColorMultiplier = [0.17, 0.2, 0.18];
-	});
-	NarrowSDK.Main.skins.savePresets();
-}
 
 // sdk stuff
 Include("SDK/Utils.js");
@@ -77,9 +61,15 @@ NarrowSDK.BetronaKeybinds = {
 	zoom: "KeyE"
 }
 
+let testkeybind = false;
+
 // custom keybind events
 window.addEventListener("keydown", function (e) {
 	if (NarrowSDK.Main !== undefined) {
+		if (e.code === "KeyR") {
+			testkeybind = true;
+		}
+
 		if (e.code === NarrowSDK.BetronaKeybinds.zoom) {
 			window.NarrowSDK.Scene.traverse(function (obj) {
 				if (obj.name === "cam") {
@@ -95,6 +85,10 @@ window.addEventListener("keydown", function (e) {
 });
 window.addEventListener("keyup", function (e) {
 	if (NarrowSDK.Main !== undefined) {
+		if (e.code === "KeyR") {
+			testkeybind = false;
+		}
+
 		if (e.code === NarrowSDK.BetronaKeybinds.zoom) {
 			window.NarrowSDK.Scene.traverse(function (obj) {
 				if (obj.name === "cam") {
@@ -114,8 +108,6 @@ window.addEventListener("load", function () {
 		console.log("Fatal error");
 		location.reload();
 	}
-
-	InitTests();
 
 	console.log(window.NarrowSDK);
 
@@ -176,6 +168,18 @@ window.addEventListener("load", function () {
 		position: absolute;
 		left: 0;
 		bottom: 0;
+	}
+
+	#mainMenuLogo{
+		background: url(file://${window.electronApi.dirname.replace('\\', '\\\\') + '/assets/override/NarrowOneBetterLogo.svg'});
+		position: absolute;
+		width: 450px;
+		height: 300px;
+		left: 50%;
+		transform: translateX(-50%);
+		filter: var(--default-drop-shadow);
+		transform-origin: top;
+		pointer-events: none;
 	}
 
 	html.theme-amoled {
@@ -848,8 +852,24 @@ window.addEventListener("load", function () {
 			//NarrowSDK.Main.gameManager.activeGame.crosshair.smoothAccuracy = -90;
 			//NarrowSDK.Main.gameManager.activeGame.crosshair.currentAccuracy = -90;
 
+			//if (testkeybind) {
+			//	if (NarrowSDK.Main.gameManager.activeGame.getMyTeamId() !== -1) {
+			//		let flagId = NarrowSDK.Main.gameManager.activeGame.getMyTeamId() - 1;
+			//		flagId = flagId == 0 ? 0 : 1;
+
+			//		NarrowSDK.Main.network.sendChangeFlag(localPlayer.id, flagId, 0);
+			//		NarrowSDK.Main.network.sendChangeFlag(localPlayer.id, flagId, 1);
+
+			//		console.log('sent request');
+			//	}
+			//}
+
 			let player = localPlayer.obj;
 			if (player !== undefined && player !== null) {
+				if (localPlayer.playerName.includes("Bot")) {
+					localPlayer.jump();
+				}
+
 				const meshWorldPosition = player.position;
 				const offsetPosition = offset.clone().applyQuaternion(player.quaternion);
 				const groupPosition = meshWorldPosition.add(offsetPosition);
