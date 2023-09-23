@@ -1,0 +1,43 @@
+{
+  "name": "betrona-client",
+  "version": "1.0.0",
+  "description": "NarrowClient",
+  "main": "src\\main.js",
+  "author": "YeemiRouth",
+  "homepage": "https://example.com",
+  "scripts": {
+    "start": "electron-forge start",
+    "build": "npx electron-builder",
+    "build-linux": "npx electron-packager . --platform=linux --arch=x64 --out=build --overwrite",
+    "build-mac": "electron-packager . --platform=darwin --arch=x64 --out=build --overwrite",
+    "build-win": "electron-packager . --platform=win32 --arch=x64 --out=build --overwrite"
+  },
+  "dependencies": {
+    "electron-localshortcut": "^3.2.1",
+    "electron-squirrel-startup": "^1.0.0",
+    "electron-store": "^8.1.0"
+  },
+  "devDependencies": {
+    "@electron-forge/cli": "^6.0.4",
+    "@electron-forge/maker-deb": "^6.0.4",
+    "@electron-forge/maker-rpm": "^6.0.4",
+    "@electron-forge/maker-squirrel": "^6.0.4",
+    "@electron-forge/maker-zip": "^6.0.4",
+    "electron": "22.0.0",
+    "electron-builder": "^24.4.0",
+    "electron-packager": "^17.1.1"
+  },
+  "eslintConfig": {},
+  "build": {
+    "appId": "com.yeemirouth.betrona",
+    "productName": "Betrona Client",
+    "directories": {
+      "output": "build"
+    },
+    "win": {
+      "target": "nsis",
+      "arch": [ "x64", "arm64" ],
+      "icon": "src/assets/build/icon.ico"
+    }
+  }
+}
