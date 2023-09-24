@@ -1,16 +1,13 @@
 {
   "name": "betrona-client",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "NarrowClient",
   "main": "src\\main.js",
   "author": "YeemiRouth",
   "homepage": "https://example.com",
   "scripts": {
     "start": "electron-forge start",
-    "build": "npx electron-builder",
-    "build-linux": "npx electron-packager . --platform=linux --arch=x64 --out=build --overwrite",
-    "build-mac": "electron-packager . --platform=darwin --arch=x64 --out=build --overwrite",
-    "build-win": "electron-packager . --platform=win32 --arch=x64 --out=build --overwrite"
+    "build": "npx electron-builder"
   },
   "dependencies": {
     "electron-localshortcut": "^3.2.1",
@@ -35,8 +32,10 @@
       "output": "build"
     },
     "win": {
-      "target": "nsis",
-      "arch": [ "x64", "arm64" ],
+      "target": [
+        "nsis",
+        "portable"
+      ],
       "icon": "src/assets/build/icon.ico"
     }
   }

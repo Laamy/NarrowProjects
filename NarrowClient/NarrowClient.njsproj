@@ -48,6 +48,7 @@
     <Content Include="src\assets\paper_wing.png" />
     <Content Include="src\assets\paper_wing.svg" />
     <Content Include="src\background.js" />
+    <Content Include="src\Hooks\AutoGGHook.js" />
     <Content Include="src\Hooks\LoadMapHook.js">
       <SubType>Code</SubType>
     </Content>

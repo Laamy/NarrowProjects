@@ -1,5 +1,5 @@
 // define our skill level utilities
-NarrowSDK.SquadNetwork = {
+NarrowSDK.SkillLevel = {
 
     // define our replacemethods function that should be called once per page load
     ReplaceMethods: function () {

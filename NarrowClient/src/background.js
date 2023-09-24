@@ -10,6 +10,14 @@
 	window.removeTrails = false;
 	window.customMainMenu = true;
 	window.randomMainMenu = false;
+	window.dragonWings = true;
+	window.autoGG = false;
+	window.autoGGMsg = "GG - Betrona ontop";
+
+	window.arrowTrail = {
+		alphaSmoothing: 0.4, // default
+		colourMultiplier: [1, 0, 0]
+	}
 
 	window.adSkip = true;
 
@@ -39,11 +47,25 @@ Include("Hooks/LoadMapHook.js");
 Include("Hooks/NetConnectHook.js");
 Include("Hooks/SquadChatHook.js");
 Include("Hooks/RecieveFromServerHook.js");
+Include("Hooks/AutoGGHook.js");
 //Include("Hooks/SkillLevelHook.js");
 
 /*
 
 i put test hooks here at first
+
+* IDEAS:
+* Movable UI
+* Player Statistics
+* Replay System
+* Public Squads
+* Singleplayer (no exp/coins duh)
+* Custom soundtracks/more based on maps
+* Dynamic Map Events (For example a random rock or sand flicking up or maybe wind to make it feel more alive)
+* Map Queue (allow some kind of spotify like queue/playlist with repeat & shuffle controls for maps)
+* Valorant crosshair like editor menu
+* Killfeed
+* 
 
 */
 
@@ -63,6 +85,155 @@ NarrowSDK.BetronaKeybinds = {
 }
 
 let testkeybind = false;
+
+function RecompileGameShaders() {
+	let arrowTrailMat = NarrowSDK.Main.materials.materialsCache.get("arrowTrail");
+	arrowTrailMat.fragmentShader = `
+			//fragment shader for arrowTrail
+
+			#define FOG
+			
+			
+			
+
+			varying vec3 vColor;
+			varying vec4 worldPos;
+
+			uniform vec3 skyHighCol;
+			uniform vec3 skyMidCol;
+			uniform vec3 skyLowCol;
+			uniform float skyPower;
+			#ifdef FOG
+				uniform float fogAmount;
+				uniform float fogHeightAmount;
+				uniform float fogHeightOffset;
+				uniform float fogHeightDistFalloff;
+				uniform float fogHeightAmountMin;
+				uniform float fogHeightAmountMax;
+				float fogLerpValue;
+				#define NEEDS_FOG_COLOR
+			#endif
+			#ifdef NEEDS_FOG_COLOR
+				varying float skyColorLerpValue;
+			#endif
+			#ifdef NEEDS_MODEL_POS_VARYING
+				varying vec3 vModelPos;
+			#endif
+			#ifdef NEEDS_UV
+				varying vec2 vUv;
+			#endif
+
+			float alpha = 1.0;
+
+			#include <packing>
+			varying vec2 vHighPrecisionZW;
+
+			
+					uniform float arrowPosT;
+					uniform float arrowShootT;
+					uniform vec3 shootStartPos;
+					uniform float estimatedXLength;
+					varying float vArrowT;
+				
+
+			#ifdef NEEDS_FOG_COLOR
+				vec3 getFogcolor(){
+					float absLerpValue = abs(skyColorLerpValue);
+					float lerpValue = pow(max(0.0, absLerpValue), skyPower);
+					if (skyColorLerpValue < 0.0) {
+						return mix(skyMidCol, skyLowCol, lerpValue);
+					} else {
+						return mix(skyMidCol, skyHighCol, lerpValue);
+					}
+				}
+			#endif
+
+			#ifdef FOG
+			vec3 applyFog(vec3 col){
+				col = mix(col, getFogcolor(), fogLerpValue);
+				return col;
+			}
+			#endif
+
+			
+
+			vec3 modifyCol(vec3 col){
+				
+					float t = arrowPosT - vArrowT;
+					float shootT = arrowShootT - vArrowT;
+					alpha = 1.0;
+
+					// fade in at start of trail
+					alpha = min(alpha, 0.2 * t - 0.5);
+
+					// fade out at end of trail
+					alpha = min(alpha, 1.0 - 3.0 * (shootT / estimatedXLength));
+
+					alpha = min(alpha, length(shootStartPos - worldPos.xyz));
+
+					alpha = min(alpha, length(cameraPosition - worldPos.xyz) - 0.3);
+
+					alpha *= ${window.arrowTrail.alphaSmoothing};
+				
+				return col * vec3(${window.arrowTrail.colourMultiplier[0]} * 255, ${window.arrowTrail.colourMultiplier[1]} * 255, ${window.arrowTrail.colourMultiplier[2]} * 255);
+			}
+
+			vec4 modifyTexCol(vec4 col, vec2 uv){
+				
+				return col;
+			}
+
+			float computeFog(float dist, float fogAmount) {
+				return 1.0 - exp(-dist * fogAmount);
+			}
+
+			float computeHeightFog(float fogAmount, float fogHeightAmount, float dist, float originHeight, float deltaHeight) {
+				float h = fogHeightAmount;
+				float fog = (fogAmount / h) * exp(-originHeight * h) * (1.0 - exp(-dist * deltaHeight * h)) / deltaHeight;
+				return clamp(fog, 0.0, 1.0);
+			}
+
+			void main(){
+				#ifdef FOG
+					vec3 deltaPos = vec3(worldPos) - cameraPosition;
+					float fogDistValue = length(deltaPos);
+					if (fogHeightAmount < 0.00001) {
+						fogLerpValue = computeFog(fogDistValue, fogAmount);
+					} else {
+						float min = computeFog(fogDistValue, fogHeightAmountMin);
+						float max = computeFog(fogDistValue, fogHeightAmountMax);
+						float distAmount = fogHeightAmount * pow(fogHeightDistFalloff, - fogDistValue);
+						float heightFog = computeHeightFog(fogAmount, distAmount, fogDistValue, cameraPosition.y - fogHeightOffset, normalize(deltaPos).y);
+						fogLerpValue = clamp(heightFog, min, max);
+					}
+				#endif
+				vec3 col = modifyCol(vColor);
+				#ifdef FOG
+					col = applyFog(col);
+				#endif
+				gl_FragColor = LinearTosRGB(vec4(col, alpha));
+			}
+		`;
+}
+
+// gotta move this to utils later
+function hexToRgb(hex) {
+	hex = hex.replace("#", "");
+
+	var r = parseInt(hex.substring(0, 2), 16);
+	var g = parseInt(hex.substring(2, 4), 16);
+	var b = parseInt(hex.substring(4, 6), 16);
+
+	return [r, g, b];
+}
+
+function rgbToHex(rgbArray) {
+	var hexArray = rgbArray.map(value => value.toString(16).padStart(2, "0"));
+
+	var hexString = "#" + hexArray.join("");
+
+	return hexString;
+}
 
 // custom keybind events
 window.addEventListener("keydown", function (e) {
@@ -149,6 +320,23 @@ window.addEventListener("load", function () {
 	}
 	if (SettingsGet("mainmenu.random") !== undefined) {
 		window.randomMainMenu = SettingsGet("mainmenu.random");
+	}
+
+	if (SettingsGet("game.dragonWings") !== undefined) {
+		window.dragonWings = SettingsGet("game.dragonWings");
+	}
+	if (SettingsGet("game.autoGG") !== undefined) {
+		window.autoGG = SettingsGet("game.autoGG");
+	}
+	if (SettingsGet("game.autoGGMsg") !== undefined) {
+		window.autoGGMsg = SettingsGet("game.autoGGMsg");
+	}
+
+	if (SettingsGet("arrowtrail.hex") !== undefined) {
+		window.arrowTrail.colourMultiplier = hexToRgb(SettingsGet("arrowtrail.hex"));
+	}
+	if (SettingsGet("arrowtrail.smoothing") == true) { // modified main menu settings stuff
+		window.arrowTrail.alphaSmoothing = 0.8;
 	}
 
 	// found in Hooks/LoadMapHook.js
@@ -293,6 +481,76 @@ window.addEventListener("load", function () {
 		const settingsListDiv = document.createElement("div");
 		settingsListDiv.className = "settings-list";
 		dialogDiv.appendChild(settingsListDiv);
+
+		{
+			const settingsGroupHeader = document.createElement("h3");
+			settingsGroupHeader.className = "settings-group-header";
+			settingsGroupHeader.textContent = "Arrow Trails";
+			settingsListDiv.appendChild(settingsGroupHeader);
+		}
+
+		{
+			// <div class="settings-item"><div class="settings-item-text">Color</div><input class="dialog-color-input wrinkledPaper" type="color"></div>
+			var settingsItemDiv = document.createElement("div");
+			settingsItemDiv.classList.add("settings-item");
+
+			var settingsItemTextDiv = document.createElement("div");
+			settingsItemTextDiv.classList.add("settings-item-text");
+			settingsItemTextDiv.textContent = "Color(our)";
+
+			var inputColorPicker = document.createElement("input");
+			inputColorPicker.setAttribute("type", "color");
+			inputColorPicker.classList.add("dialog-color-input", "wrinkledPaper");
+
+			inputColorPicker.value = rgbToHex(window.arrowTrail.colourMultiplier);
+
+			inputColorPicker.addEventListener("change", function (event) {
+				window.arrowTrail.colourMultiplier = hexToRgb(event.target.value);
+
+				SettingsSet("arrowtrail.hex", event.target.value);
+
+				RecompileGameShaders();
+			});
+
+			settingsItemDiv.appendChild(settingsItemTextDiv);
+			settingsItemDiv.appendChild(inputColorPicker);
+			settingsListDiv.appendChild(settingsItemDiv);
+		}
+
+		{
+			var settingsItemDiv = document.createElement("div");
+			settingsItemDiv.classList.add("settings-item");
+
+			var settingsItemTextDiv = document.createElement("div");
+			settingsItemTextDiv.classList.add("settings-item-text");
+			settingsItemTextDiv.textContent = "Smoothing";
+
+			var inputCheckbox = document.createElement("input");
+			inputCheckbox.setAttribute("type", "checkbox");
+			inputCheckbox.classList.add("dialog-checkbox-input", "wrinkledPaper");
+
+			if (window.arrowTrail.alphaSmoothing === 0.4) {
+				inputCheckbox.checked = false;
+			}
+			else {
+				inputCheckbox.checked = true;
+			}
+
+			inputCheckbox.addEventListener("change", function (event) {
+				SettingsSet("arrowtrail.smoothing", event.target.checked);
+
+				if (event.target.checked) {
+					window.arrowTrail.alphaSmoothing = 0.8;
+				}
+				else {
+					window.arrowTrail.alphaSmoothing = 0.4;
+				}
+			});
+
+			settingsItemDiv.appendChild(settingsItemTextDiv);
+			settingsItemDiv.appendChild(inputCheckbox);
+			settingsListDiv.appendChild(settingsItemDiv);
+		}
 
 		{
 			const settingsGroupHeader = document.createElement("h3");
@@ -444,7 +702,6 @@ window.addEventListener("load", function () {
 			settingsListDiv.appendChild(settingsItemDiv);
 		}
 
-
 		{
 			var settingsItemDiv = document.createElement("div");
 			settingsItemDiv.classList.add("settings-item");
@@ -466,6 +723,86 @@ window.addEventListener("load", function () {
 
 			settingsItemDiv.appendChild(settingsItemTextDiv);
 			settingsItemDiv.appendChild(inputCheckbox);
+			settingsListDiv.appendChild(settingsItemDiv);
+		}
+
+		{
+			const settingsGroupHeader = document.createElement("h3");
+			settingsGroupHeader.className = "settings-group-header";
+			settingsGroupHeader.textContent = "Game";
+			settingsListDiv.appendChild(settingsGroupHeader);
+		}
+
+		{
+			var settingsItemDiv = document.createElement("div");
+			settingsItemDiv.classList.add("settings-item");
+
+			var settingsItemTextDiv = document.createElement("div");
+			settingsItemTextDiv.classList.add("settings-item-text");
+			settingsItemTextDiv.textContent = "Dragon Wings";
+
+			var inputCheckbox = document.createElement("input");
+			inputCheckbox.setAttribute("type", "checkbox");
+			inputCheckbox.classList.add("dialog-checkbox-input", "wrinkledPaper");
+
+			inputCheckbox.checked = window.dragonWings;
+
+			inputCheckbox.addEventListener("change", function (event) {
+				SettingsSet("game.dragonWings", event.target.checked);
+				window.dragonWings = event.target.checked;
+			});
+
+			settingsItemDiv.appendChild(settingsItemTextDiv);
+			settingsItemDiv.appendChild(inputCheckbox);
+			settingsListDiv.appendChild(settingsItemDiv);
+		}
+
+		{
+			var settingsItemDiv = document.createElement("div");
+			settingsItemDiv.classList.add("settings-item");
+
+			var settingsItemTextDiv = document.createElement("div");
+			settingsItemTextDiv.classList.add("settings-item-text");
+			settingsItemTextDiv.textContent = "AutoGG";
+
+			var inputCheckbox = document.createElement("input");
+			inputCheckbox.setAttribute("type", "checkbox");
+			inputCheckbox.classList.add("dialog-checkbox-input", "wrinkledPaper");
+
+			inputCheckbox.checked = window.autoGG;
+
+			inputCheckbox.addEventListener("change", function (event) {
+				SettingsSet("game.autoGG", event.target.checked);
+				window.autoGG = event.target.checked;
+			});
+
+			settingsItemDiv.appendChild(settingsItemTextDiv);
+			settingsItemDiv.appendChild(inputCheckbox);
+			settingsListDiv.appendChild(settingsItemDiv);
+		}
+
+		{
+			var settingsItemDiv = document.createElement("div");
+			settingsItemDiv.classList.add("settings-item");
+
+			var settingsItemTextDiv = document.createElement("div");
+			settingsItemTextDiv.classList.add("settings-item-text");
+			settingsItemTextDiv.textContent = "GG Message";
+
+			var textBox = document.createElement("input");
+			textBox.setAttribute("type", "text");
+			textBox.classList.add("textbox-element");
+
+			textBox.value = window.autoGGMsg;
+
+			textBox.addEventListener("input", function (event) {
+				SettingsSet("game.autoGGMsg", event.target.value);
+				window.autoGGMsg = event.target.value;
+				console.log(event.target.value);
+			});
+
+			settingsItemDiv.appendChild(settingsItemTextDiv);
+			settingsItemDiv.appendChild(textBox);
 			settingsListDiv.appendChild(settingsItemDiv);
 		}
 
@@ -835,6 +1172,8 @@ window.addEventListener("load", function () {
 
 	const offset = new THREE.Vector3(0, 1.3, -0.2);
 
+	RecompileGameShaders();
+
 	function onFrame() {
 		//for (const e of NarrowSDK.Main.materials.allMaterials()) {
 		//	e.uniforms.colorMultiplier.value.set(new THREE.Color(1.4, 1.4, 1.4));
@@ -847,40 +1186,33 @@ window.addEventListener("load", function () {
 
 		requestAnimationFrame(onFrame.bind(this));
 
+		if (NarrowSDK.AutoGG.Prototype == undefined && NarrowSDK.Main.gameManager.activeGame.doGameEndSteps) {
+			NarrowSDK.AutoGG.ReplaceMethods();
+		}
+
 		let localPlayer = NarrowSDK.Utils.GetLocalPlayer();
 
-		if (localPlayer !== undefined && localPlayer !== null) { // dont play around with crosshair class
+		if (localPlayer !== undefined && localPlayer !== null) { // dont play around with crosshair class cuz it actually edits the spread
 			//NarrowSDK.Main.gameManager.activeGame.crosshair.smoothAccuracy = -90;
 			//NarrowSDK.Main.gameManager.activeGame.crosshair.currentAccuracy = -90;
 
-			//if (testkeybind) {
-			//	if (NarrowSDK.Main.gameManager.activeGame.getMyTeamId() !== -1) {
-			//		let flagId = NarrowSDK.Main.gameManager.activeGame.getMyTeamId() - 1;
-			//		flagId = flagId == 0 ? 0 : 1;
-
-			//		NarrowSDK.Main.network.sendChangeFlag(localPlayer.id, flagId, 0);
-			//		NarrowSDK.Main.network.sendChangeFlag(localPlayer.id, flagId, 1);
-
-			//		console.log('sent request');
-			//	}
-			//}
-
 			let player = localPlayer.obj;
 			if (player !== undefined && player !== null) {
-				if (localPlayer.playerName.includes("Bot")) {
-					localPlayer.jump();
+				if (window.dragonWings) {
+					const meshWorldPosition = player.position;
+					const offsetPosition = offset.clone().applyQuaternion(player.quaternion);
+					const groupPosition = meshWorldPosition.add(offsetPosition);
+					wingsGroup.position.copy(groupPosition);
+					wingsGroup.rotation.copy(player.rotation);
+
+					wingsGroup.updateMatrix();
+					wingsGroup.updateWorldMatrix(false, true);
+
+					wingsGroup.visible = player.visible; // third person only
 				}
-
-				const meshWorldPosition = player.position;
-				const offsetPosition = offset.clone().applyQuaternion(player.quaternion);
-				const groupPosition = meshWorldPosition.add(offsetPosition);
-				wingsGroup.position.copy(groupPosition);
-				wingsGroup.rotation.copy(player.rotation);
-
-				wingsGroup.updateMatrix();
-				wingsGroup.updateWorldMatrix(false, true);
-
-				wingsGroup.visible = player.visible; // third person only
+				else {
+					wingsGroup.visible = false; // disabeld wings cuz gay person
+				}
 			}
 		}
 		else {
@@ -960,6 +1292,13 @@ window.addEventListener("load", function () {
 		if (firstPersonHandMaterial !== undefined) {
 			firstPersonHandMaterial.wireframe = window.wireBow;
 		}
+
+		NarrowSDK.Main.skins.skinPresets.forEach(function (present) {
+			present.hairColorMultiplier = [0.4, 0, 0.4];
+			present.eyebrowColorMultiplier = [0.4, 0, 0.4];
+			present.beardColorMultiplier = [0.4, 0, 0.4];
+		});
+		NarrowSDK.Main.skins.savePresets();
 
 		NarrowSDK.Utils.ForEachFirstPersonObjContainer(function (firstPersonObjContainer) {
 			try {

@@ -69,9 +69,7 @@ EventTarget.prototype.addEventListener = new Proxy(EventTarget.prototype.addEven
 							if (msg) {
 								const packet = JSON.parse(msg);
 								const n = NarrowSDK.Main.gameManager.activeGame.chat.game.players.get(packet.data.playerId);
-								console.log(n.playerName + ": " + packet.data.message);
-
-								
+								//console.log(n.playerName + ": " + packet.data.message);
 							}
 						}
 					}
