@@ -1293,12 +1293,12 @@ window.addEventListener("load", function () {
 			firstPersonHandMaterial.wireframe = window.wireBow;
 		}
 
-		NarrowSDK.Main.skins.skinPresets.forEach(function (present) {
-			present.hairColorMultiplier = [0.4, 0, 0.4];
-			present.eyebrowColorMultiplier = [0.4, 0, 0.4];
-			present.beardColorMultiplier = [0.4, 0, 0.4];
-		});
-		NarrowSDK.Main.skins.savePresets();
+		//NarrowSDK.Main.skins.skinPresets.forEach(function (present) {
+		//	present.hairColorMultiplier = [0.4, 0, 0.4];
+		//	present.eyebrowColorMultiplier = [0.4, 0, 0.4];
+		//	present.beardColorMultiplier = [0.4, 0, 0.4];
+		//});
+		//NarrowSDK.Main.skins.savePresets();
 
 		NarrowSDK.Utils.ForEachFirstPersonObjContainer(function (firstPersonObjContainer) {
 			try {
